@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>04 - 思考：推理与问题解决 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="配置 LLM 进行逻辑推理，理解纯 LLM 推理的局限性，以及何时需要外部工具。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 04 思考
+			</div>
+			<h1>04 - 思考：推理与问题解决</h1>
+			<div class="meta">
+				<span>难度：中级</span>
+				<span>时长：~20 分钟</span>
+				<span>关键概念：推理、问题分解、局限性</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>概述</h2>
+					<p>本示例演示了如何将大语言模型（LLM）配置为<strong>推理智能体（Reasoning Agent）</strong>，使其具备分析思维和定量问题求解能力。它展示了从简单文本生成到复杂认知任务之间的桥梁。</p>
+				</div>
+
+				<div class="content-section" id="what-is-reasoning">
+					<h2>什么是推理智能体？</h2>
+					<p><strong>推理智能体</strong>是一种通过精心设计的系统提示词（System Prompt）配置的 LLM，能够执行逻辑分析、数学计算和多步问题求解。</p>
+
+					<h3>类比理解</h3>
+					<div class="diagram">普通对话                     推理智能体
+─────────────               ──────────────────
+"你能帮我吗？"              "我是一名数学家。
+"当然！你需要什么？"         我系统地分析问题
+                            并计算精确答案。"</div>
+				</div>
+
+				<div class="content-section" id="challenges">
+					<h2>推理的挑战</h2>
+					<h3>为什么推理对 LLM 来说很难</h3>
+					<div class="diagram">┌───────────────────────────────────────┐
+│  LLM 训练                             │
+│  "预测文本中的下一个词"               │
+│                                       │
+│  并非显式训练以下能力：               │
+│  • 逐步逻辑推理                       │
+│  • 算术计算                           │
+│  • 追踪多个变量                       │
+│  • 系统性问题分解                     │
+└───────────────────────────────────────┘</div>
+					<p>然而，它们可以从训练数据中学习推理模式，并通过系统提示词加以引导。</p>
+				</div>
+
+				<div class="content-section" id="system-prompt-reasoning">
+					<h2>通过系统提示词实现推理</h2>
+					<h3>配置模式</h3>
+					<div class="diagram">┌─────────────────────────────────────────┐
+│  系统提示词组件                         │
+├─────────────────────────────────────────┤
+│  1. 角色："专业推理者"                  │
+│  2. 任务："分析并解决问题"              │
+│  3. 方法："计算精确答案"                │
+│  4. 输出："单个数值"                    │
+└─────────────────────────────────────────┘
+         ↓
+    推理行为</div>
+
+					<h3>推理任务类型</h3>
+					<div class="diagram">定量推理（本示例）：
+问题 → 统计实体 → 计算 → 单位换算 → 答案
+
+逻辑推理：
+前提 → 应用规则 → 推导结论 → 答案
+
+分析推理：
+数据 → 识别模式 → 形成假设 → 得出结论</div>
+				</div>
+
+				<div class="content-section" id="how-llm-reasons">
+					<h2>LLM 如何"推理"</h2>
+					<h3>模式匹配 vs 真正的推理</h3>
+					<div class="diagram">┌─────────────────────────────────────────────┐
+│  LLM 实际的工作方式                         │
+│                                             │
+│  1. 模式识别                                │
+│     "这看起来是一个计数问题"                │
+│                                             │
+│  2. 模板应用                                │
+│     "类似的问题遵循这种模式"                │
+│                                             │
+│  3. 统计推断                                │
+│     "这些数字可能以这种方式组合"            │
+│                                             │
+│  4. 学到的程序                              │
+│     "我见过这种类型的计算"                  │
+└─────────────────────────────────────────────┘</div>
+
+					<h3>推理过程</h3>
+					<div class="diagram">输入：复杂应用题
+         ↓
+    ┌────────────┐
+    │   解析     │  识别实体和关系
+    └────────────┘
+         ↓
+    ┌────────────┐
+    │   分解     │  拆分为子问题
+    └────────────┘
+         ↓
+    ┌────────────┐
+    │   计算     │  执行算术运算
+    └────────────┘
+         ↓
+    ┌────────────┐
+    │   综合     │  合并结果
+    └────────────┘
+         ↓
+     最终答案</div>
+				</div>
+
+				<div class="content-section" id="complexity">
+					<h2>问题复杂度层级</h2>
+					<div class="diagram">简单                                        困难
+│                                             │
+│  简单     多步      嵌套       隐式         │
+│  算术     逻辑      条件       推理         │
+│                                             │
+└─────────────────────────────────────────────┘
+
+示例：
+简单：  "5 + 3 等于多少？"
+中等：  "如果 3 个苹果每个 2 美元，总共多少钱？"
+困难：  "统计具有复杂家庭关系的家庭成员人数"</div>
+
+					<h3>本示例的复杂度</h3>
+					<p>土豆问题<strong>极其复杂</strong>：</p>
+					<ul>
+						<li>多个实体（15 人以上）</li>
+						<li>关系推理（家谱）</li>
+						<li>条件逻辑（如果已婚则...）</li>
+						<li>否定条件（已故人员）</li>
+						<li>特殊情况（饮食限制）</li>
+						<li>多次计算</li>
+						<li>单位换算</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="limitations">
+					<h2>纯 LLM 推理的局限性</h2>
+					<h3>常见失败模式</h3>
+					<ul>
+						<li><strong>计数错误：</strong>统计 15 个具有复杂关系的人时，可能输出 "14" 或 "16"</li>
+						<li><strong>算术错误：</strong>在多步计算的中间步骤出错</li>
+						<li><strong>上下文丢失：</strong>忘记前面的信息</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="evolution">
+					<h2>改进推理：演进路径</h2>
+
+					<h3>级别 1：纯提示（本示例）</h3>
+					<div class="diagram">用户 → LLM → 答案
+       ↑
+    系统提示词</div>
+					<p>局限性：所有推理都在 LLM 内部完成，没有验证，没有工具，过程不可见。</p>
+
+					<h3>级别 2：思维链（Chain-of-Thought）</h3>
+					<div class="diagram">用户 → LLM → 展示过程 → 答案
+       ↑
+    "解释你的推理"</div>
+
+					<h3>级别 3：工具增强（simple-agent）</h3>
+					<div class="diagram">用户 → LLM ⟷ 工具 → 答案
+       ↑    （计算器）
+    系统提示词</div>
+
+					<h3>级别 4：ReAct 模式（react-agent）</h3>
+					<div class="diagram">用户 → LLM → 思考 → 行动 → 观察
+       ↑      ↓      ↓      ↓
+    系统    推理    工具    结果
+    提示词         使用
+       ↑           ↓       ↓
+       └───────────迭代────┘</div>
+				</div>
+
+				<div class="content-section" id="comparison">
+					<h2>不同类型的智能体对比</h2>
+					<table>
+						<thead>
+							<tr><th></th><th>推理</th><th>工具</th><th>记忆</th><th>多轮对话</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>intro.js</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td></tr>
+							<tr><td>translation.js</td><td>~</td><td>✗</td><td>✗</td><td>✗</td></tr>
+							<tr><td><strong>think.js（本示例）</strong></td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+							<tr><td>simple-agent.js</td><td>✓</td><td>✓</td><td>✗</td><td>~</td></tr>
+							<tr><td>memory-agent.js</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+							<tr><td>react-agent.js</td><td>✓✓</td><td>✓</td><td>~</td><td>✓</td></tr>
+						</tbody>
+					</table>
+					<p>图例：✗ = 不具备，~ = 有限/隐式，✓ = 具备，✓✓ = 高级/显式</p>
+				</div>
+
+				<div class="content-section" id="key-takeaways">
+					<h2>关键要点</h2>
+					<ol>
+						<li><strong>系统提示词赋能推理</strong>：合理的配置可以将 LLM 转变为推理智能体</li>
+						<li><strong>局限性存在</strong>：纯 LLM 推理在复杂问题上容易出错</li>
+						<li><strong>工具有帮助</strong>：外部计算（计算器等）可以提高准确性</li>
+						<li><strong>迭代很重要</strong>：多步推理模式（如 ReAct）效果更好</li>
+						<li><strong>透明性有价值</strong>：可见的推理过程有助于调试和验证</li>
+					</ol>
+				</div>
+
+				<div class="page-nav">
+					<a href="03_translation.html">
+						<div class="label">上一节</div>
+						<div class="name">03 - 翻译与系统提示</div>
+					</a>
+					<a href="05_batch.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">05 - 批处理与并行</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#what-is-reasoning">什么是推理智能体</a></li>
+						<li><a href="#challenges">推理的挑战</a></li>
+						<li><a href="#system-prompt-reasoning">通过系统提示词实现推理</a></li>
+						<li><a href="#how-llm-reasons">LLM 如何推理</a></li>
+						<li><a href="#complexity">问题复杂度层级</a></li>
+						<li><a href="#limitations">纯 LLM 推理的局限性</a></li>
+						<li><a href="#evolution">改进推理的演进路径</a></li>
+						<li><a href="#comparison">智能体对比</a></li>
+						<li><a href="#key-takeaways">关键要点</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

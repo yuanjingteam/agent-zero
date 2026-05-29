@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>03 - 翻译：系统提示与智能体专业化 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="使用系统提示专业化智能体，控制输出格式，实现基于角色的行为。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 03 翻译
+			</div>
+			<h1>03 - 翻译：系统提示与智能体专业化</h1>
+			<div class="meta">
+				<span>难度：入门</span>
+				<span>时长：~15 分钟</span>
+				<span>关键概念：系统提示、提示工程、行为约束</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>概述</h2>
+					<p>本示例演示如何使用<strong>系统提示词（System Prompts）</strong>将通用的 LLM（大语言模型）转变为<strong>专门化智能体（Specialized Agent）</strong>。关键洞察在于：你不需要为不同任务准备不同的模型——你需要的是不同的指令。</p>
+				</div>
+
+				<div class="content-section" id="what-is-system-prompt">
+					<h2>什么是系统提示词？</h2>
+					<p><strong>系统提示词</strong>是一条持久性指令，用于在整个对话会话中塑造 AI 的行为。</p>
+
+					<h3>类比</h3>
+					<div class="diagram">没有系统提示词                    有系统提示词
+─────────────────────         ──────────────────────
+"嗨，我是 AI。"                "我是一名专业翻译，
+                              精通科学德语。
+"我能为你做什么？"             我遵循严格的质量准则
+                              和输出格式。"</div>
+				</div>
+
+				<div class="content-section" id="how-it-works">
+					<h2>系统提示词的工作原理</h2>
+					<h3>上下文结构</h3>
+					<div class="diagram">┌─────────────────────────────────────────────┐
+│           上下文窗口（Context Window）        │
+│                                             │
+│  ┌───────────────────────────────────────┐ │
+│  │  系统提示词（始终存在）                 │ │
+│  │  "你是一名专业翻译……"                  │ │
+│  │  "遵循以下规则……"                     │ │
+│  └───────────────────────────────────────┘ │
+│                    ↓                        │
+│  ┌───────────────────────────────────────┐ │
+│  │  用户消息                             │ │
+│  │  "翻译这段文本……"                     │ │
+│  └───────────────────────────────────────┘ │
+│                    ↓                        │
+│  ┌───────────────────────────────────────┐ │
+│  │  AI 回复                              │ │
+│  │  （受系统提示词塑造）                   │ │
+│  └───────────────────────────────────────┘ │
+└─────────────────────────────────────────────┘</div>
+					<p>系统提示词位于上下文的最顶部，影响<strong>每一次</strong>回复。</p>
+				</div>
+
+				<div class="content-section" id="specialization">
+					<h2>智能体专门化模式</h2>
+					<h3>转变流程</h3>
+					<div class="diagram">┌──────────────────┐    ┌─────────────────┐    ┌──────────────────┐
+│   通用模型       │ +  │  系统提示词     │ =  │  专门化智能体    │
+│                  │    │                 │    │                  │
+│ • 了解很多知识   │    │ • 定义角色      │    │ • 翻译智能体     │
+│ • 没有特定角色   │    │ • 设定规则      │    │ • 编码智能体     │
+│                  │    │ • 约束输出      │    │ • 分析智能体     │
+└──────────────────┘    └─────────────────┘    └──────────────────┘</div>
+
+					<h3>专门化示例</h3>
+					<pre><code>// 翻译智能体（本示例）
+systemPrompt = 角色 + 规则 + 输出格式
+
+// 代码助手
+systemPrompt: "You are an expert programmer.
+Always provide working code with comments.
+Explain complex logic."
+
+// 数据分析员
+systemPrompt: "You are a data analyst.
+Always show your calculations step-by-step.
+Cite data sources when available."</code></pre>
+				</div>
+
+				<div class="content-section" id="anatomy">
+					<h2>有效系统提示词的解剖</h2>
+					<h3>五大组成部分</h3>
+					<div class="diagram">┌─────────────────────────────────────────┐
+│  1. 角色定义（Role Definition）          │
+│  "你是一名 [具体角色]……"                │
+├─────────────────────────────────────────┤
+│  2. 任务描述（Task Description）         │
+│  "你的目标是……"                         │
+├─────────────────────────────────────────┤
+│  3. 行为规则（Behavioral Rules）         │
+│  "始终做 X，绝不做 Y……"                 │
+├─────────────────────────────────────────┤
+│  4. 输出格式（Output Format）            │
+│  "按以下格式输出你的回复……"              │
+├─────────────────────────────────────────┤
+│  5. 约束条件（Constraints）              │
+│  "不要包含……"                           │
+└─────────────────────────────────────────┘</div>
+
+					<h3>本示例的结构</h3>
+					<div class="diagram">角色：      "专业科学翻译"
+任务：      "将英语精确翻译为德语"
+规则：      8 条具体翻译指南
+格式：      地道德语，科学风格
+约束：      "仅输出翻译文本，不加解释"</div>
+				</div>
+
+				<div class="content-section" id="quality">
+					<h2>为什么详细的系统提示词很重要</h2>
+					<h3>质量影响</h3>
+					<table>
+						<thead>
+							<tr><th>详细程度</th><th>输出质量</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>非常简略</td><td>不可预测</td></tr>
+							<tr><td>基本角色</td><td>有一定一致性</td></tr>
+							<tr><td>详细说明</td><td>高度一致</td></tr>
+							<tr><td>过度详细</td><td>可能令模型困惑</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="patterns">
+					<h2>系统提示词设计模式</h2>
+
+					<h3>模式 1：角色扮演</h3>
+					<pre><code>"你是一名 [职业]，在 [领域] 方面具有专业知识……"</code></pre>
+					<p>让模型采用该角色视角。</p>
+
+					<h3>模式 2：基于规则</h3>
+					<pre><code>"遵循以下规则：
+1. 始终……
+2. 绝不……
+3. 当 X 发生时，做 Y……"</code></pre>
+					<p>明确的约束带来可预测的行为。</p>
+
+					<h3>模式 3：输出格式化</h3>
+					<pre><code>"按以下格式输出你的回复：
+- JSON
+- Markdown
+- 纯文本
+- 逐步列表"</code></pre>
+
+					<h3>模式 4：上下文感知</h3>
+					<pre><code>"你记得：[先前的事实]
+你知道：[领域知识]
+当前情况：[上下文]"</code></pre>
+				</div>
+
+				<div class="content-section" id="agent-relation">
+					<h2>这与 AI 智能体的关系</h2>
+					<div class="diagram">┌────────────────────────────────────────────┐
+│             AI 智能体                       │
+│                                            │
+│  ┌──────────────────────────────────────┐ │
+│  │  系统提示词（智能体的"身份"）         │ │
+│  └──────────────────────────────────────┘ │
+│                  ↓                         │
+│  ┌──────────────────────────────────────┐ │
+│  │  LLM（智能体的"大脑"）               │ │
+│  └──────────────────────────────────────┘ │
+│                  ↓                         │
+│  ┌──────────────────────────────────────┐ │
+│  │  工具（智能体的"双手"）[可选]        │ │
+│  └──────────────────────────────────────┘ │
+└────────────────────────────────────────────┘</div>
+				</div>
+
+				<div class="content-section" id="chat-wrappers">
+					<h2>聊天包装器详解</h2>
+					<p>不同的模型需要不同的对话格式：</p>
+					<table>
+						<thead>
+							<tr><th>模型类型</th><th>所需格式</th><th>包装器</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>Llama 2/3</td><td>Llama 格式</td><td>LlamaChatWrapper</td></tr>
+							<tr><td>GPT 风格</td><td>ChatML 格式</td><td>ChatMLWrapper</td></tr>
+							<tr><td>Harmony 模型</td><td>Harmony 格式</td><td>HarmonyChatWrapper</td></tr>
+						</tbody>
+					</table>
+					<div class="diagram">你的消息 → [聊天包装器] → 格式化的提示词 → 模型
+                    ↓
+          添加特殊 token：
+          &lt;|system|&gt;, &lt;|user|&gt;, &lt;|assistant|&gt;</div>
+				</div>
+
+				<div class="content-section" id="evolution">
+					<h2>演进路径</h2>
+					<div class="diagram">1. 基础提示           (intro.js)
+       ↓
+2. 系统提示词          (translation.js) ← 你在这里
+       ↓
+3. 系统提示词 + 工具    (simple-agent.js)
+       ↓
+4. 多轮推理            (react-agent.js)
+       ↓
+5. 完整智能体系统</div>
+					<p>本示例通过展示如何通过指令实现专门化，弥合了基础 LLM 使用与真正智能体行为之间的差距。</p>
+				</div>
+
+				<div class="page-nav">
+					<a href="02_openai.html">
+						<div class="label">上一节</div>
+						<div class="name">02 - OpenAI 入门</div>
+					</a>
+					<a href="04_think.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">04 - 思考与推理</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#what-is-system-prompt">什么是系统提示词</a></li>
+						<li><a href="#how-it-works">工作原理</a></li>
+						<li><a href="#specialization">智能体专门化</a></li>
+						<li><a href="#anatomy">有效系统提示词的解剖</a></li>
+						<li><a href="#quality">详细程度的影响</a></li>
+						<li><a href="#patterns">设计模式</a></li>
+						<li><a href="#agent-relation">与 AI 智能体的关系</a></li>
+						<li><a href="#chat-wrappers">聊天包装器</a></li>
+						<li><a href="#evolution">演进路径</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

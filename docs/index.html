@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>从零开始构建 AI 智能体 - 教程</title>
+	<meta name="description" content="学习在本地构建 AI 智能体（Agent），不依赖任何框架。通过 14 个示例从 LLM 基础到 ReAct、思维树、思维图逐步深入。">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="#overview">概述</a></li>
+				<li><a href="#architecture">架构</a></li>
+				<li><a href="#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="hero">
+		<div class="container">
+			<div class="hero-badges">
+				<span class="badge"><span class="dot green"></span>本地运行</span>
+				<span class="badge"><span class="dot yellow"></span>零框架依赖</span>
+				<span class="badge"><span class="dot cyan"></span>14 个示例</span>
+			</div>
+			<h1>从零开始构建 AI 智能体</h1>
+			<p class="subtitle">不依赖任何框架，在本地使用 node-llama-cpp 构建 AI 智能体。在使用生产级框架之前，先理解底层的工作原理。</p>
+			<div class="hero-actions">
+				<a href="#path" class="btn btn-primary">开始学习</a>
+				<a href="https://github.com/yuanjingteam/AgentZero" class="btn btn-secondary" target="_blank">查看源码</a>
+			</div>
+		</div>
+	</header>
+
+	<section id="overview">
+		<div class="container">
+			<h2 class="section-title">什么是 AI 智能体？</h2>
+			<p class="section-desc">AI 智能体不仅仅是文本生成 — 它是 LLM 与工具、记忆和推理模式的结合。</p>
+
+			<div class="formula-box">
+				<span class="label">智能体公式</span>
+				<span class="eq">AI 智能体 = LLM + 系统提示 + 工具 + 记忆 + 推理模式</span>
+				<br><br>
+				<span style="color: var(--text-muted); font-size: 0.9rem;">大脑 &nbsp;&nbsp;&nbsp; 身份标识 &nbsp;&nbsp;&nbsp; 双手 &nbsp;&nbsp;&nbsp; 状态 &nbsp;&nbsp;&nbsp; 策略</span>
+			</div>
+
+			<div class="arch-grid">
+				<div class="arch-card">
+					<div class="icon">&#x1F9E0;</div>
+					<h3>LLM（大脑）</h3>
+					<p>处理信息、生成响应、做出决策的核心引擎。本地运行，数据不离开你的机器。</p>
+				</div>
+				<div class="arch-card">
+					<div class="icon">&#x1F3AF;</div>
+					<h3>系统提示（身份）</h3>
+					<p>定义智能体的角色、行为和约束。让通用模型变成专业助手。</p>
+				</div>
+				<div class="arch-card">
+					<div class="icon">&#x1F527;</div>
+					<h3>工具（双手）</h3>
+					<p>函数调用让 LLM 能够执行操作 — 查询时间、计算、搜索、操作文件。</p>
+				</div>
+				<div class="arch-card">
+					<div class="icon">&#x1F4BE;</div>
+					<h3>记忆（状态）</h3>
+					<p>跨会话持久化信息，让智能体记住用户偏好和历史交互。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="architecture" style="background: var(--bg-secondary);">
+		<div class="container">
+			<h2 class="section-title">架构演进</h2>
+			<p class="section-desc">从简单的 LLM 调用到完整的智能体系统，逐步构建复杂度。</p>
+
+			<div class="arch-grid">
+				<div class="arch-card">
+					<div class="icon">&#x1F7E2;</div>
+					<h3>基础 LLM</h3>
+					<pre><code>用户 → LLM → 响应</code></pre>
+					<p>纯文本生成，无工具，无记忆。</p>
+				</div>
+				<div class="arch-card">
+					<div class="icon">&#x1F7E1;</div>
+					<h3>工具使用</h3>
+					<pre><code>用户 → LLM ⟷ 工具 → 响应</code></pre>
+					<p>函数调用，LLM 可以执行操作。</p>
+				</div>
+				<div class="arch-card">
+					<div class="icon">&#x1F7E0;</div>
+					<h3>记忆智能体</h3>
+					<pre><code>用户 → LLM ⟷ 工具 → 响应
+        ↕
+      记忆</code></pre>
+					<p>持久化状态，跨会话记忆。</p>
+				</div>
+				<div class="arch-card">
+					<div class="icon">&#x1F534;</div>
+					<h3>ReAct 智能体</h3>
+					<pre><code>用户 → LLM → 思考 → 行动 → 观察
+      ↑      ↓      ↓      ↓
+      └──────┴──────┴──────┘
+          迭代直到解决</code></pre>
+					<p>推理 + 行动循环，现代智能体基础。</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="path">
+		<div class="container">
+			<h2 class="section-title">学习路径</h2>
+			<p class="section-desc">14 个循序渐进的示例，从基础 LLM 交互到高级推理模式。每个示例都包含可运行代码、逐行讲解和概念解析。</p>
+
+			<div class="path">
+				<!-- 01 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/01_intro.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">01</span>
+							<span class="path-title">入门 — 基本 LLM 交互</span>
+						</div>
+						<p class="path-desc">加载本地 GGUF 模型，进行基本的提示/响应交互。理解模型加载、上下文窗口和逐 Token 生成。</p>
+						<div class="path-tags">
+							<span class="tag">node-llama-cpp</span>
+							<span class="tag">模型加载</span>
+							<span class="tag">Token 生成</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 02 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/02_openai.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">02</span>
+							<span class="path-title">（可选）OpenAI 入门 — 使用专有模型</span>
+						</div>
+						<p class="path-desc">调用托管 LLM（GPT-4），了解温度控制和 Token 使用量。对比本地与云端的权衡。</p>
+						<div class="path-tags">
+							<span class="tag">OpenAI API</span>
+							<span class="tag">温度控制</span>
+							<span class="tag">成本分析</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 03 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/03_translation.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">03</span>
+							<span class="path-title">翻译 — 系统提示与专业化</span>
+						</div>
+						<p class="path-desc">使用系统提示专业化智能体，控制输出格式，实现基于角色的行为。</p>
+						<div class="path-tags">
+							<span class="tag">系统提示</span>
+							<span class="tag">提示工程</span>
+							<span class="tag">行为约束</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 04 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/04_think.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">04</span>
+							<span class="path-title">思考 — 推理与问题解决</span>
+						</div>
+						<p class="path-desc">配置 LLM 进行逻辑推理，理解纯 LLM 推理的局限性，以及何时需要外部工具。</p>
+						<div class="path-tags">
+							<span class="tag">推理</span>
+							<span class="tag">问题分解</span>
+							<span class="tag highlight">局限性</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 05 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/05_batch.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">05</span>
+							<span class="path-title">批处理 — 并行处理</span>
+						</div>
+						<p class="path-desc">并发处理多个请求，使用上下文序列和 GPU 批处理优化吞吐量。</p>
+						<div class="path-tags">
+							<span class="tag">并行执行</span>
+							<span class="tag">GPU 批处理</span>
+							<span class="tag">性能优化</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 06 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/06_coding.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">06</span>
+							<span class="path-title">编码 — 流式传输与响应控制</span>
+						</div>
+						<p class="path-desc">实时流式响应，Token 预算管理，渐进式输出显示，优化用户体验。</p>
+						<div class="path-tags">
+							<span class="tag">Streaming</span>
+							<span class="tag">Token 限制</span>
+							<span class="tag">实时反馈</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 07 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/07_simple-agent.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">07</span>
+							<span class="path-title">简单智能体 — 函数调用（工具使用）</span>
+						</div>
+						<p class="path-desc"><strong>关键一步！</strong>定义 LLM 可以使用的工具，实现函数调用。文本生成转变为智能体。</p>
+						<div class="path-tags">
+							<span class="tag highlight">函数调用</span>
+							<span class="tag">JSON Schema</span>
+							<span class="tag">智能体决策</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 08 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/08_memory.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">08</span>
+							<span class="path-title">带记忆的智能体 — 持久化状态</span>
+						</div>
+						<p class="path-desc">跨会话持久化信息，长期记忆管理，事实和偏好存储，记忆检索策略。</p>
+						<div class="path-tags">
+							<span class="tag">持久化记忆</span>
+							<span class="tag">状态管理</span>
+							<span class="tag">上下文增强</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 09 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/09_react.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">09</span>
+							<span class="path-title">ReAct 智能体 — 推理 + 行动</span>
+						</div>
+						<p class="path-desc"><strong>现代智能体框架的基础！</strong>推理-行动-观察循环，迭代式问题解决，自我纠错。</p>
+						<div class="path-tags">
+							<span class="tag highlight">ReAct</span>
+							<span class="tag">迭代推理</span>
+							<span class="tag">多步骤智能体</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 10 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/10_aot.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">10</span>
+							<span class="path-title">思维原子 — 结构化规划</span>
+						</div>
+						<p class="path-desc">思维原子方法论，用于多步骤计算的原子规划，依赖管理和确定性执行。</p>
+						<div class="path-tags">
+							<span class="tag">AoT</span>
+							<span class="tag">依赖解析</span>
+							<span class="tag">计划验证</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 11 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/11_error.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">11</span>
+							<span class="path-title">错误处理 — 弹性与降级</span>
+						</div>
+						<p class="path-desc">类型化错误分类，超时与重试策略，优雅降级，关联 ID 和可观测性。</p>
+						<div class="path-tags">
+							<span class="tag">重试策略</span>
+							<span class="tag">优雅降级</span>
+							<span class="tag">可观测性</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 12 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/12_tot.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">12</span>
+							<span class="path-title">思维树 — 搜索推理分支</span>
+						</div>
+						<p class="path-desc">束搜索（Beam Search）遍历多个候选路径，评分剪枝，可视化搜索过程。</p>
+						<div class="path-tags">
+							<span class="tag highlight">Tree of Thought</span>
+							<span class="tag">束搜索</span>
+							<span class="tag">分支剪枝</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 13 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/13_got.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">13</span>
+							<span class="path-title">思维图 — DAG 多源合并</span>
+						</div>
+						<p class="path-desc">将推理建模为有向无环图，并行源提取、冲突解决和合并规则。</p>
+						<div class="path-tags">
+							<span class="tag highlight">Graph of Thought</span>
+							<span class="tag">DAG 编排</span>
+							<span class="tag">多源融合</span>
+						</div>
+					</a>
+				</div>
+
+				<!-- 14 -->
+				<div class="path-item">
+					<div class="path-dot"><span></span></div>
+					<a href="examples/14_cot.html" class="path-content" style="text-decoration:none; color: inherit;">
+						<div class="path-header">
+							<span class="path-num">14</span>
+							<span class="path-title">思维链 — 可审计的分步决策</span>
+						</div>
+						<p class="path-desc">结构化多阶段推理，防止早期偏见，生成可审计的最终决策。</p>
+						<div class="path-tags">
+							<span class="tag highlight">Chain of Thought</span>
+							<span class="tag">推理轨迹</span>
+							<span class="tag">可解释性</span>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="quickstart" style="background: var(--bg-secondary);">
+		<div class="container">
+			<h2 class="section-title">快速开始</h2>
+			<p class="section-desc">三步即可开始学习。</p>
+
+			<pre><code># 1. 克隆仓库
+git clone https://github.com/yuanjingteam/agent-zero.git
+cd agent-zero
+
+# 2. 安装依赖
+npm install
+
+# 3. 下载模型（选择一个即可）
+npx node-llama-cpp pull qwen3-1.7b
+
+# 4. 运行第一个示例
+node examples/01_intro/intro.js</code></pre>
+		</div>
+	</section>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

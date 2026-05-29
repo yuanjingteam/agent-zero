@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>13 - 思维图：DAG 多源合并 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="将推理建模为有向无环图，并行源提取、冲突解决和合并规则。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 13 思维图
+			</div>
+			<h1>13 - 思维图（GoT）：DAG 多源合并</h1>
+			<div class="meta">
+				<span>难度：高级</span>
+				<span>时长：~30 分钟</span>
+				<span>关键概念：Graph of Thought、DAG 编排、多源融合</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>图思维：一个人的动机分析</h2>
+					<p>图思维（Graph of Thought）保持多条推理线索并存并将其组合。与思维树（Tree of Thought）不同，较弱的分支不会被自动丢弃。</p>
+				</div>
+
+				<div class="content-section" id="visualization">
+					<h2>可视化图结构</h2>
+					<div class="diagram">                    [root: behavior]
+                   /    |      |    \
+             [n2]    [n3]   [n4]   [n5]      ← 4 hypotheses (branch)
+          Avoidance Burnout Growth Pressure
+             Sc:6     Sc:9    Sc:7   Sc:4
+                \      / \            |
+                 \    /   \           |
+              [n6:Contrast]  [n7:Contrast]    ← Burnout vs Avoidance / Burnout vs Pressure
+              (n3 vs n2)     (n3 vs n5)
+                  |    \         |
+                  |   [n8:Refined]  [n9:Refined]  ← weak hypothesis rescued and improved
+                  |    (n5+n3)      (n4+n6)
+                  |        \       /
+              [n10:Synthesis1]  [n11:Synthesis2] ← partial syntheses
+              (n3,n2,n6)        (n8,n9,n7)
+                    \              /
+                   [n12:CONCLUSION]            <- all strands merged
+                  (n10,n11,n6,n7,n8)</div>
+				</div>
+
+				<div class="content-section" id="why-different">
+					<h2>为什么图思维能给出不同层次的答案</h2>
+					<p>思维树通常选择一个获胜者并丢弃替代方案。图思维恰恰相反：它通过图操作复用替代方案。</p>
+					<p>在本示例中：</p>
+					<ul>
+						<li><strong>分支（Branch）：</strong>构建四个相互竞争的假设。</li>
+						<li><strong>评分（Score）：</strong>对它们排名，但全部保留在图中。</li>
+						<li><strong>对比（Contrast）：</strong>将分歧转化为新的诊断信号。</li>
+						<li><strong>精炼（Refine）：</strong>利用强势分支改进弱势分支。</li>
+						<li><strong>聚合（Aggregate）：</strong>将多个来源合并为综合分析。</li>
+						<li><strong>结论（Conclude）：</strong>使用所有线索得出最终整合视图。</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="operations">
+					<h2>图思维操作及其价值</h2>
+					<table>
+						<thead>
+							<tr><th>操作</th><th>在本示例中揭示的内容</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>对比</td><td>假设之间的建设性张力成为显式证据</td></tr>
+							<tr><td>精炼</td><td>弱势假设被挽救而非丢弃</td></tr>
+							<tr><td>聚合</td><td>不同线索被综合为更丰富的中间视图</td></tr>
+							<tr><td>结论</td><td>最终答案包含矛盾和被挽救的洞察</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="core-insight">
+					<h2>核心要点</h2>
+					<div class="formula-box">
+						<span class="label">思维树 vs 图思维</span>
+						<span class="eq">思维树问：哪个分支获胜？</span>
+						<br>
+						<span class="eq">图思维问：多个分支如何互动以产生更好的最终模型？</span>
+					</div>
+					<p>这就是为什么图思维能够产生不仅仅是"评分更高"，而是结构上更完整的答案。</p>
+				</div>
+
+				<div class="content-section" id="when-to-use">
+					<h2>在实际工作中何时使用图思维</h2>
+					<p>当多个视角需要保持关联并相互影响时，使用图思维。</p>
+
+					<h3>系统管理员的心智模型</h3>
+					<p>一次区域性故障仅影响部分用户，且各工具的症状相互矛盾。</p>
+					<ul>
+						<li><strong>分支：</strong>网络路由问题、数据库复制延迟、或认证服务依赖超时。</li>
+						<li><strong>对比：</strong>比较相互矛盾的分支。</li>
+						<li><strong>精炼：</strong>使用新的遥测数据更新较弱的解释。</li>
+						<li><strong>聚合：</strong>构建一个综合事故模型。</li>
+						<li><strong>结论：</strong>协调一个针对多个诱因的分阶段缓解计划。</li>
+					</ul>
+					<p>为什么适合：真实事故往往是多因素的，过早丢弃"较弱"信号可能会隐藏真正的故障链。</p>
+
+					<h3>开发者的心智模型</h3>
+					<p>一个不稳定的端到端测试在 CI 中不可预测地失败。</p>
+					<ul>
+						<li><strong>分支：</strong>竞态条件、时钟偏差、测试数据耦合、或外部 API 不确定性。</li>
+						<li><strong>对比：</strong>使用失败追踪和时间戳对假设进行两两比较。</li>
+						<li><strong>精炼：</strong>利用日志和重跑的强证据改进弱势假设。</li>
+						<li><strong>聚合：</strong>构建一个整合解释。</li>
+						<li><strong>结论：</strong>生成一个结合代码变更、测试隔离和 CI 环境防护的修复计划。</li>
+					</ul>
+					<p>为什么适合：调试通常需要假设之间的交互，而不是过早选出单一赢家。</p>
+
+					<h3>AI 智能体创建者的心智模型</h3>
+					<p>你正在为复杂任务设计一个研究级规划智能体。</p>
+					<ul>
+						<li><strong>分支：</strong>不同的任务分解和工具序列。</li>
+						<li><strong>对比：</strong>让计划相互批判以暴露隐含假设。</li>
+						<li><strong>精炼：</strong>利用强势计划的洞察改进弱势计划。</li>
+						<li><strong>聚合：</strong>将互补的子计划合并为一个稳健的策略。</li>
+						<li><strong>结论：</strong>在更丰富的上下文中执行，并保留可追溯的推理产物。</li>
+					</ul>
+					<p>为什么适合：处理模糊、高风险任务的智能体受益于保留和重组推理，而非过早剪枝。</p>
+				</div>
+
+				<div class="content-section" id="summary">
+					<h2>总结</h2>
+					<p>图思维在以下情况下最为强大：</p>
+					<ul>
+						<li>问题本身是模糊的</li>
+						<li>较弱的信号在精炼后可能变得有价值</li>
+						<li>且你希望最终答案保留矛盾而非隐藏它们</li>
+					</ul>
+				</div>
+
+				<div class="page-nav">
+					<a href="12_tot.html">
+						<div class="label">上一节</div>
+						<div class="name">12 - 思维树</div>
+					</a>
+					<a href="14_cot.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">14 - 思维链</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#visualization">可视化图结构</a></li>
+						<li><a href="#why-different">为什么不同</a></li>
+						<li><a href="#operations">图操作及其价值</a></li>
+						<li><a href="#core-insight">核心要点</a></li>
+						<li><a href="#when-to-use">何时使用</a></li>
+						<li><a href="#summary">总结</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

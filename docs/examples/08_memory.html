@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>08 - 带记忆的智能体：持久化状态 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="跨会话持久化信息，长期记忆管理，事实和偏好存储，记忆检索策略。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 08 记忆智能体
+			</div>
+			<h1>08 - 带记忆的智能体：持久化状态</h1>
+			<div class="meta">
+				<span>难度：中级</span>
+				<span>时长：~25 分钟</span>
+				<span>关键概念：持久化记忆、状态管理、上下文增强</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>概述</h2>
+					<p>添加持久化记忆（Persistent Memory）可以将智能体（Agent）从无状态的响应者转变为能够跨会话维持上下文和关系的系统。</p>
+				</div>
+
+				<div class="content-section" id="memory-problem">
+					<h2>记忆问题</h2>
+					<div class="diagram">没有记忆                        有记忆
+──────────────                 ─────────────
+会话 1：                        会话 1：
+"I'm Alex"                     "I'm Alex" → 已保存
+"I love pizza"                 "I love pizza" → 已保存
+
+会话 2：                        会话 2：
+"What's my name?"              "What's my name?"
+"I don't know"                 "Alex!" ✓</div>
+				</div>
+
+				<div class="content-section" id="architecture">
+					<h2>架构</h2>
+					<div class="diagram">┌─────────────────────────────────┐
+│         智能体会话               │
+├─────────────────────────────────┤
+│  系统提示词（System Prompt）      │
+│  + 已加载的记忆                  │
+│  + saveMemory 工具              │
+└────────┬────────────────────────┘
+         │
+         ↓
+┌─────────────────────────────────┐
+│      记忆管理器（Memory Manager） │
+├─────────────────────────────────┤
+│  • 从存储加载                    │
+│  • 保存到存储                    │
+│  • 格式化用于提示词              │
+└────────┬────────────────────────┘
+         │
+         ↓
+┌─────────────────────────────────┐
+│   持久化存储（Persistent Storage）│
+│   (agent-memory.json)           │
+└─────────────────────────────────┘</div>
+				</div>
+
+				<div class="content-section" id="how-it-works">
+					<h2>工作原理</h2>
+					<h3>1. 启动阶段</h3>
+					<div class="diagram">1. 加载 agent-memory.json
+2. 提取事实和偏好
+3. 添加到系统提示词
+4. 智能体"记住"了过去的信息</div>
+
+					<h3>2. 对话过程中</h3>
+					<div class="diagram">用户分享信息
+       ↓
+智能体识别重要事实
+       ↓
+智能体调用 saveMemory()
+       ↓
+保存到 JSON 文件
+       ↓
+在未来的会话中可用</div>
+
+					<h3>3. 记忆类型</h3>
+					<p><strong>事实（Facts）</strong>：一般信息</p>
+					<pre><code>{
+  "memories": [
+    {
+      "type": "fact",
+      "key": "user_name",
+      "value": "Alex",
+      "source": "user",
+      "timestamp": "2025-10-29T11:22:57.372Z"
+    }
+  ]
+}</code></pre>
+					<p><strong>偏好（Preferences）</strong>：</p>
+					<pre><code>{
+  "memories": [
+    {
+      "type": "preference",
+      "key": "favorite_food",
+      "value": "pizza",
+      "source": "user",
+      "timestamp": "2025-10-29T11:22:58.022Z"
+    }
+  ]
+}</code></pre>
+				</div>
+
+				<div class="content-section" id="integration-patterns">
+					<h2>记忆集成模式</h2>
+					<h3>系统提示词增强</h3>
+					<div class="diagram">基础提示词：
+"You are a helpful assistant."
+
+增强后的带记忆提示词：
+"You are a helpful assistant with long-term memory.
+
+=== LONG-TERM MEMORY ===
+Known Facts:
+- User's name is Alex
+- User loves pizza"</div>
+
+					<h3>工具辅助保存</h3>
+					<div class="diagram">智能体决定何时保存：
+用户："My favorite color is blue"
+      ↓
+智能体："我应该记住这个"
+      ↓
+调用：saveMemory(type="preference", key="color", content="blue")</div>
+				</div>
+
+				<div class="content-section" id="memory-strategies">
+					<h2>记忆策略</h2>
+					<div class="arch-grid">
+						<div class="arch-card">
+							<div class="icon">&#x1F4DD;</div>
+							<h3>情景记忆</h3>
+							<p>存储具体事件和对话："用户在异步概念上遇到了困难"</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F4A1;</div>
+							<h3>语义记忆</h3>
+							<p>存储事实和知识："用户是软件工程师"</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x2699;</div>
+							<h3>程序记忆</h3>
+							<p>存储操作方法："用户的工作流程：设计 → 编码 → 测试"</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="content-section" id="challenges">
+					<h2>挑战与解决方案</h2>
+					<table>
+						<thead>
+							<tr><th>挑战</th><th>问题</th><th>解决方案</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>记忆膨胀</td><td>过多记忆导致智能体运行变慢</td><td>重要性评分、定期清理、摘要压缩</td></tr>
+							<tr><td>信息冲突</td><td>"喜欢披萨" vs "素食主义者"</td><td>时间戳判断、显式更新、冲突解决</td></tr>
+							<tr><td>隐私保护</td><td>记忆中包含敏感信息</td><td>数据加密、访问控制、过期策略</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="evolution">
+					<h2>演进路径</h2>
+					<div class="diagram">1. 无状态 → 每次交互相互独立
+2. 会话记忆 → 在对话中记住信息
+3. 持久化记忆 → 跨会话记住信息
+4. 分布式记忆 → 跨实例共享
+5. 语义搜索 → 查找相关记忆</div>
+				</div>
+
+				<div class="content-section" id="comparison">
+					<h2>对比</h2>
+					<table>
+						<thead>
+							<tr><th>功能</th><th>简单智能体</th><th>带记忆智能体</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>记住姓名</td><td>✗</td><td>✓</td></tr>
+							<tr><td>回忆偏好</td><td>✗</td><td>✓</td></tr>
+							<tr><td>个性化</td><td>✗</td><td>✓</td></tr>
+							<tr><td>上下文连续性</td><td>✗</td><td>✓</td></tr>
+							<tr><td>跨会话状态</td><td>✗</td><td>✓</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="key-takeaways">
+					<h2>核心要点</h2>
+					<p>记忆将智能体从工具转变为助手。它们能够建立关系、提供个性化体验，并随时间维持上下文。</p>
+					<p><strong>这对于生产级 AI 智能体系统至关重要。</strong></p>
+				</div>
+
+				<div class="page-nav">
+					<a href="07_simple-agent.html">
+						<div class="label">上一节</div>
+						<div class="name">07 - 简单智能体</div>
+					</a>
+					<a href="09_react.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">09 - ReAct 智能体</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#memory-problem">记忆问题</a></li>
+						<li><a href="#architecture">架构</a></li>
+						<li><a href="#how-it-works">工作原理</a></li>
+						<li><a href="#integration-patterns">集成模式</a></li>
+						<li><a href="#memory-strategies">记忆策略</a></li>
+						<li><a href="#challenges">挑战与解决方案</a></li>
+						<li><a href="#evolution">演进路径</a></li>
+						<li><a href="#comparison">对比</a></li>
+						<li><a href="#key-takeaways">核心要点</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>11 - 错误处理：弹性与降级 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="类型化错误分类，超时与重试策略，优雅降级，关联 ID 和可观测性。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 11 错误处理
+			</div>
+			<h1>11 - 错误处理：弹性与降级</h1>
+			<div class="meta">
+				<span>难度：高级</span>
+				<span>时长：~25 分钟</span>
+				<span>关键概念：重试策略、优雅降级、可观测性</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>概述</h2>
+					<p>智能体比普通应用更容易失败，因为它们编排了<strong>多个不可靠的步骤</strong>：</p>
+					<ul>
+						<li><strong>LLM 调用</strong>（超时、资源限制、格式错误的输出、运行时异常）</li>
+						<li><strong>工具执行</strong>（网络故障、无效输入、服务不可用）</li>
+						<li><strong>工作流逻辑</strong>（策略拦截、部分完成、跨工具的依赖链）</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="error-classification">
+					<h2>标准化的错误分类体系</h2>
+					<p>使用一小组带有<strong>稳定错误码</strong>和一致字段的错误类：</p>
+					<div class="arch-grid">
+						<div class="arch-card">
+							<div class="icon">&#x26A0;</div>
+							<h3>ValidationError</h3>
+							<p>用户输入缺失/无效（快速失败；通常不可重试）</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F916;</div>
+							<h3>LLMCallError</h3>
+							<p>LLM 提供商/模型调用失败或返回不可用的输出（通常可重试）</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F527;</div>
+							<h3>ToolExecutionError</h3>
+							<p>工具失败（有时可重试，有时不可重试）</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x26D4;</div>
+							<h3>AgentWorkflowError</h3>
+							<p>编排级别的失败 — 多步骤运行无法按设计完成</p>
+						</div>
+					</div>
+
+					<h3>每个错误包含</h3>
+					<ul>
+						<li><strong>code</strong>：机器可读的稳定标识符（适合指标和告警）</li>
+						<li><strong>userMessage</strong>：展示给用户的安全、非技术性消息</li>
+						<li><strong>retryable</strong>：是否适合自动重试</li>
+						<li><strong>details</strong>：用于日志的结构化数据</li>
+						<li><strong>cause</strong>：原始错误（保留根本原因链）</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="recovery-strategies">
+					<h2>分类与恢复策略</h2>
+					<p><strong>先标准化，再分类。</strong> <code>normalizeUnknownError</code> 将任意抛出的值转换为 <code>AppError</code>。<code>classifyError</code> 添加 <code>retryable</code> 和 <code>type</code>。</p>
+
+					<h3>典型的阶梯式恢复策略</h3>
+					<div class="diagram">超时 → 限制任何步骤的停滞时间
+  ↓
+重试 → 仅当 classifyError 判定为 retryable 时（带退避和抖动）
+  ↓
+备用方案 → 如果主工具以瞬态方式失败，运行更安全的替代方案
+  ↓
+降级模式 → 确定性地提取 ID 并使用主工具 > 备用工具模型
+  ↓
+优雅失败 → 如果无法恢复，返回 formatUserFacingError 加上关联 ID</div>
+				</div>
+
+				<div class="content-section" id="user-vs-debug">
+					<h2>将用户消息与调试信息分离</h2>
+					<div class="arch-grid">
+						<div class="arch-card">
+							<div class="icon">&#x1F464;</div>
+							<h3>用户看到</h3>
+							<ul>
+								<li>清晰的下一步操作</li>
+								<li>没有堆栈跟踪</li>
+								<li>引用 ID</li>
+							</ul>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F4BB;</div>
+							<h3>开发者看到</h3>
+							<ul>
+								<li>稳定的错误 code</li>
+								<li>结构化的 details</li>
+								<li>关联 ID</li>
+								<li>原始 cause</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="content-section" id="deterministic-demo">
+					<h2>确定性演示与 SIMULATION</h2>
+					<p>为了保持教学运行的可预测性，用户 ID <code>u_999</code> 和 <code>u_777</code> 由一个小的 <code>SIMULATION</code> 映射驱动：</p>
+					<ul>
+						<li>文本中的 <code>u_demo_workflow</code> 触发 <code>policy_guard</code></li>
+						<li><code>SKIP_LLM_DEGRADED u_777</code> 跳过 LLM，进入降级模式，并使用 <code>u_777</code> 使主工具和备用工具都以可复现的方式失败</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="why-scalable">
+					<h2>为什么这种模式可扩展</h2>
+					<div class="arch-grid">
+						<div class="arch-card">
+							<div class="icon">&#x1F504;</div>
+							<h3>一致性</h3>
+							<p>所有故障都以相同方式呈现；未知错误在处理前被标准化</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F4CA;</div>
+							<h3>可观测性</h3>
+							<p>指标/告警按 code 和工作流 step 分组</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F512;</div>
+							<h3>安全性</h3>
+							<p>敏感/提供商特定的细节不会出现在用户消息中</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F6E1;</div>
+							<h3>弹性</h3>
+							<p>瞬态问题自动恢复；硬故障降级或上报，保留 cause</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="page-nav">
+					<a href="10_aot.html">
+						<div class="label">上一节</div>
+						<div class="name">10 - 思维原子</div>
+					</a>
+					<a href="12_tot.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">12 - 思维树</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#error-classification">错误分类体系</a></li>
+						<li><a href="#recovery-strategies">恢复策略</a></li>
+						<li><a href="#user-vs-debug">用户与调试信息分离</a></li>
+						<li><a href="#deterministic-demo">确定性演示</a></li>
+						<li><a href="#why-scalable">为什么可扩展</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

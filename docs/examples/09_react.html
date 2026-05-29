@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>09 - ReAct 智能体：推理 + 行动 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="推理-行动-观察循环，迭代式问题解决，自我纠错，现代智能体框架的基础。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 09 ReAct 智能体
+			</div>
+			<h1>09 - ReAct 智能体：推理 + 行动</h1>
+			<div class="meta">
+				<span>难度：高级</span>
+				<span>时长：~30 分钟</span>
+				<span>关键概念：ReAct、迭代推理、多步骤智能体</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>什么是 ReAct？</h2>
+					<p><strong>ReAct</strong>（Reasoning + Acting，推理与行动）是一个将以下能力结合的框架：</p>
+					<ul>
+						<li><strong>推理（Reasoning）</strong>：逐步思考问题</li>
+						<li><strong>行动（Acting）</strong>：使用工具完成子任务</li>
+						<li><strong>观察（Observing）</strong>：从工具结果中学习</li>
+					</ul>
+					<p>这使得智能体能够可靠地解决复杂的多步骤问题。</p>
+				</div>
+
+				<div class="content-section" id="core-pattern">
+					<h2>核心模式</h2>
+					<div class="diagram">┌─────────────┐
+│    问题     │
+└──────┬──────┘
+       │
+       ▼
+┌─────────────────────────────────────┐
+│          ReAct 循环                 │
+│                                     │
+│  ┌──────────────────────────────┐  │
+│  │  1. 思考（THOUGHT）          │  │
+│  │  "我需要做什么？"            │  │
+│  └─────────────┬────────────────┘  │
+│                ▼                    │
+│  ┌──────────────────────────────┐  │
+│  │  2. 行动（ACTION）           │  │
+│  │  调用工具并传入参数          │  │
+│  └─────────────┬────────────────┘  │
+│                ▼                    │
+│  ┌──────────────────────────────┐  │
+│  │  3. 观察（OBSERVATION）      │  │
+│  │  接收工具返回结果            │  │
+│  └─────────────┬────────────────┘  │
+│                │                    │
+│                └──► 重复或          │
+│                     最终答案        │
+└─────────────────────────────────────┘</div>
+				</div>
+
+				<div class="content-section" id="why-important">
+					<h2>为什么 ReAct 很重要</h2>
+					<h3>传统大语言模型的困难</h3>
+					<ol>
+						<li><strong>复杂计算</strong> — 算术错误</li>
+						<li><strong>多步骤问题</strong> — 容易丢失进度</li>
+						<li><strong>使用工具</strong> — 不知道何时使用、如何使用</li>
+						<li><strong>解释决策</strong> — 黑盒推理</li>
+					</ol>
+
+					<h3>ReAct 解决了这些问题</h3>
+					<ol>
+						<li><strong>可靠的计算</strong> — 委托给工具执行</li>
+						<li><strong>结构化的进度</strong> — 显式的步骤</li>
+						<li><strong>工具编排</strong> — 知道何时使用哪个工具</li>
+						<li><strong>透明的推理</strong> — 可见的思考过程</li>
+					</ol>
+				</div>
+
+				<div class="content-section" id="three-components">
+					<h2>三大组件</h2>
+					<h3>1. 思考（Thought，推理）</h3>
+					<p>智能体推理需要什么信息、使用哪个工具、结果是否合理、下一步该做什么。</p>
+					<pre><code>Thought: 我需要计算 15 × 8 来得出收入</code></pre>
+
+					<h3>2. 行动（Action，工具使用）</h3>
+					<p>智能体使用特定参数调用工具。</p>
+					<pre><code>Action: multiply(15, 8)</code></pre>
+
+					<h3>3. 观察（Observation，学习）</h3>
+					<p>智能体接收并解读工具结果。</p>
+					<pre><code>Observation: 120</code></pre>
+				</div>
+
+				<div class="content-section" id="full-example">
+					<h2>完整示例</h2>
+					<div class="diagram">问题："如果 15 件商品每件 $8，20 件商品每件 $8，
+      总收入是多少？"
+
+Thought: 首先我需要计算 15 件商品的收入
+Action: multiply(15, 8)
+Observation: 120
+
+Thought: 现在我需要计算 20 件商品的收入
+Action: multiply(20, 8)
+Observation: 160
+
+Thought: 现在我需要将两项收入相加
+Action: add(120, 160)
+Observation: 280
+
+Thought: 我已经得到了最终答案
+Answer: 总收入为 $280</div>
+				</div>
+
+				<div class="content-section" id="comparison">
+					<h2>与其他方法的比较</h2>
+
+					<h3>零样本提示（Zero-Shot）</h3>
+					<pre><code>用户："计算 15×8 + 20×8"
+LLM："答案是 279"  ❌ 错误！</code></pre>
+
+					<h3>思维链（Chain-of-Thought）</h3>
+					<pre><code>用户："计算 15×8 + 20×8"
+LLM："让我逐步思考：
+     15×8 = 120
+     20×8 = 160
+     120+160 = 279"  ❌ 还是错了！</code></pre>
+
+					<h3>ReAct（本实现）</h3>
+					<pre><code>用户："计算 15×8 + 20×8"
+智能体：
+  Thought: 计算 15×8
+  Action: multiply(15, 8)
+  Observation: 120
+  Thought: 计算 20×8
+  Action: multiply(20, 8)
+  Observation: 160
+  Thought: 将结果相加
+  Action: add(120, 160)
+  Observation: 280
+  Answer: 280  ✅ 正确！</code></pre>
+				</div>
+
+				<div class="content-section" id="architecture-diagram">
+					<h2>架构图</h2>
+					<div class="diagram">┌──────────────────────────────────────┐
+│          用户问题                     │
+└──────────────┬───────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────┐
+│      使用 ReAct 提示词的 LLM          │
+│                                      │
+│  "思考、行动、观察模式"               │
+└──────┬───────────────────────────────┘
+       │
+       ├──► 生成："Thought: ..."
+       │
+       ├──► 生成："Action: tool(params)"
+       │         │
+       │         ▼
+       │    ┌─────────────────┐
+       │    │  工具执行器      │
+       │    │                 │
+       │    │  - multiply()   │
+       │    │  - add()        │
+       │    │  - divide()     │
+       │    │  - subtract()   │
+       │    └─────────┬───────┘
+       │              │
+       │              ▼
+       └───────── "Observation: result"
+       │
+       ├──► 下一次迭代或最终答案
+       │
+       ▼
+┌──────────────────────────────────────┐
+│         最终答案                      │
+└──────────────────────────────────────┘</div>
+				</div>
+
+				<div class="content-section" id="implementation">
+					<h2>实现策略</h2>
+					<h3>1. 强制执行显式模式</h3>
+					<pre><code>systemPrompt: `CRITICAL: Follow this EXACT pattern:
+Thought: [reasoning]
+Action: [tool call]
+Observation: [result]
+...
+Answer: [final answer]`</code></pre>
+
+					<h3>2. 迭代控制</h3>
+					<pre><code>maxIterations = 10  // 安全限制</code></pre>
+
+					<h3>3. 答案检测</h3>
+					<pre><code>if (response.includes("Answer:")) {
+    return fullResponse;  // 完成！
+}</code></pre>
+				</div>
+
+				<div class="content-section" id="advanced-patterns">
+					<h2>高级模式</h2>
+					<h3>自我纠错</h3>
+					<div class="diagram">Thought: 这个结果看起来不对
+Action: verify(previous_result)
+Observation: 检测到错误
+Thought: 让我重新计算
+Action: multiply(15, 8)  # 重试</div>
+
+					<h3>元推理（Meta-Reasoning）</h3>
+					<div class="diagram">Thought: 我已经用了 5 次迭代，应该尽快结束
+Action: summarize_progress()
+Observation: 仍需将最后的数字相加
+Thought: 再做一步应该就可以了</div>
+				</div>
+
+				<div class="content-section" id="research">
+					<h2>研究起源</h2>
+					<p>ReAct 由以下论文提出：</p>
+					<blockquote style="border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--text-secondary); margin: 1rem 0;">
+						<strong>"ReAct: Synergizing Reasoning and Acting in Language Models"</strong><br>
+						Yao et al., 2022<br>
+						论文链接：<a href="https://arxiv.org/abs/2210.03629" target="_blank">https://arxiv.org/abs/2210.03629</a>
+					</blockquote>
+					<p>核心发现：将推理轨迹与特定任务的行动相结合，能创造出比单独使用任一方法都更强大的智能体。</p>
+				</div>
+
+				<div class="content-section" id="summary">
+					<h2>总结</h2>
+					<p>ReAct 将大语言模型从：</p>
+					<ul>
+						<li><strong>脆弱的计算器</strong> → 可靠的问题解决者</li>
+						<li><strong>黑盒</strong> → 透明的推理者</li>
+						<li><strong>一次性回答者</strong> → 迭代式思考者</li>
+						<li><strong>孤立的模型</strong> → 使用工具的智能体</li>
+					</ul>
+					<p>它是连接语言模型与能够可靠完成复杂任务的自主智能体之间的桥梁。</p>
+				</div>
+
+				<div class="page-nav">
+					<a href="08_memory.html">
+						<div class="label">上一节</div>
+						<div class="name">08 - 带记忆的智能体</div>
+					</a>
+					<a href="10_aot.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">10 - 思维原子</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">什么是 ReAct</a></li>
+						<li><a href="#core-pattern">核心模式</a></li>
+						<li><a href="#why-important">为什么重要</a></li>
+						<li><a href="#three-components">三大组件</a></li>
+						<li><a href="#full-example">完整示例</a></li>
+						<li><a href="#comparison">方法比较</a></li>
+						<li><a href="#architecture-diagram">架构图</a></li>
+						<li><a href="#implementation">实现策略</a></li>
+						<li><a href="#advanced-patterns">高级模式</a></li>
+						<li><a href="#research">研究起源</a></li>
+						<li><a href="#summary">总结</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

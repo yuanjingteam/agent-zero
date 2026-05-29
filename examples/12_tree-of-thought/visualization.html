@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>思维树 — 动机分析</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; }
+  header { padding: 22px 32px 14px; border-bottom: 1px solid #1e2535; }
+  header h1 { font-size: 1.28rem; font-weight: 700; color: #f7fafc; }
+  header p { margin-top: 4px; font-size: .84rem; color: #a0aec0; }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 32px; background: #141820; border-bottom: 1px solid #1e2535;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .legend { display: flex; gap: 14px; font-size: .75rem; color: #94a3b8; }
+  .leg-item { display: flex; align-items: center; gap: 6px; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid; }
+
+  #canvas-wrap { position: relative; overflow-x: auto; padding: 26px 32px 18px; }
+  #canvas { position: relative; min-height: 350px; min-width: 920px; }
+  #lines { position: absolute; inset: 0; pointer-events: none; }
+
+  .stage {
+    position: absolute; top: 0; font-size: .69rem; letter-spacing: .08em;
+    text-transform: uppercase; color: #64748b; font-weight: 700;
+  }
+
+  .node {
+    position: absolute; width: 220px; border-radius: 10px; padding: 11px 12px 10px;
+    border: 1.5px solid #2d3748; background: #161c27;
+  }
+  .node.root { background: #172033; border-color: #3b82f6; }
+  .node.kept { background: #0f1e14; border-color: #2f7a50; }
+  .node.win { background: #1e1600; border-color: #d4a017; border-width: 2px; }
+  .node.pruned { opacity: .48; }
+  .title { font-size: .79rem; line-height: 1.42; color: #e2e8f0; }
+  .score {
+    margin-top: 8px; display: inline-block; font-size: .66rem; color: #94a3b8;
+    border: 1px solid #334155; border-radius: 999px; padding: 2px 7px;
+  }
+
+  #analysis {
+    margin: 0 32px 28px; padding: 18px 22px; border-radius: 10px;
+    border: 1px solid #1e2535; background: #141820;
+  }
+  #analysis h2 { font-size: .73rem; letter-spacing: .08em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
+  #summary { color: #cbd5e1; font-size: .9rem; line-height: 1.65; }
+</style>
+</head>
+<body>
+<header>
+  <h1>思维树 — 动机分析</h1>
+  <p>分支假设，对每个分支评分，修剪，从获胜分支得出结论。</p>
+</header>
+
+<div class="topbar">
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot" style="background:#172033;border-color:#3b82f6"></span>行为输入</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#0f1e14;border-color:#2f7a50"></span>保留分支</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1e1600;border-color:#d4a017"></span>获胜分支</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#161c27;border-color:#2d3748"></span>修剪分支</span>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas">
+    <svg id="lines"></svg>
+  </div>
+</div>
+
+<div id="analysis">
+  <h2>获胜总结</h2>
+  <p id="summary"></p>
+</div>
+
+<script>
+const D = {"nodes":[{"id":0,"parentId":null,"depth":0,"thought":"行为输入","lowerBound":0,"kept":true,"winning":true},{"id":1,"parentId":0,"depth":1,"thought":"回避动机（逃避消极事物）","lowerBound":8.1,"kept":false,"winning":false},{"id":2,"parentId":0,"depth":1,"thought":"倦怠与情感耗竭","lowerBound":8.8,"kept":true,"winning":true},{"id":3,"parentId":0,"depth":1,"thought":"成长动机（追求更好）","lowerBound":6.7,"kept":false,"winning":false},{"id":4,"parentId":0,"depth":1,"thought":"外部社会压力（家庭、伴侣、社会）","lowerBound":7.4,"kept":false,"winning":false},{"id":5,"parentId":2,"depth":2,"thought":"获胜分支结论","lowerBound":8.8,"kept":true,"winning":true}],"analysis":{"summary":"该女性可能正在经历倦怠和情感耗竭，导致她辞去工作并退出社交互动。","psychological_background":"倦怠的特征是情感耗竭、去人格化和个人成就感降低。在本案例中，辞职和社交退缩的组合表明该个体已达到长期压力和过度劳累的程度。长时间的独自散步可能是逃避情感负担的一种应对机制。情感耗竭会导致对社交活动失去兴趣，并倾向于退出人际关系，这与观察到的行为一致。","recommendation":"建议该女性寻求专业心理咨询，以解决潜在的情感问题。帮助她在工作和个人生活之间建立明确的界限，以防止进一步的倦怠。促进能够培养成就感和归属感的活动，例如正念练习或加入互助小组。","open_questions":["有哪些具体的触发因素或压力源导致了她的情感耗竭？","她如何有效地平衡工作责任与个人健康？","她的长期目标是什么，如何将其融入当前的生活方式？"]},"winnerName":"倦怠与情感耗竭"};
+const nodes = D.nodes;
+const canvas = document.getElementById("canvas");
+const svg = document.getElementById("lines");
+
+const byDepth = {};
+for (const n of nodes) {
+  if (!byDepth[n.depth]) byDepth[n.depth] = [];
+  byDepth[n.depth].push(n);
+}
+
+const COL_X = { 0: 30, 1: 340, 2: 680 };
+const ROW_GAP = 112;
+const NODE_W = 220;
+const NODE_H = 78;
+
+const stageNames = {
+  0: "行为",
+  1: "阶段 1-3：分支/评分/修剪",
+  2: "阶段 4：结论"
+};
+
+for (const [depth, label] of Object.entries(stageNames)) {
+  const el = document.createElement("div");
+  el.className = "stage";
+  el.style.left = `${COL_X[depth]}px`;
+  el.textContent = label;
+  canvas.appendChild(el);
+}
+
+const pos = {};
+for (const depthKey of Object.keys(byDepth)) {
+  const depth = Number(depthKey);
+  const list = byDepth[depth];
+  list.forEach((n, i) => {
+    pos[n.id] = {
+      x: COL_X[depth],
+      y: 36 + i * ROW_GAP
+    };
+  });
+}
+
+const maxY = Math.max(...Object.values(pos).map(p => p.y));
+canvas.style.height = `${maxY + NODE_H + 40}px`;
+svg.setAttribute("width", canvas.clientWidth);
+svg.setAttribute("height", canvas.clientHeight);
+
+for (const n of nodes) {
+  const card = document.createElement("div");
+  let cls = "node";
+  if (n.depth === 0) cls += " root";
+  else if (n.winning) cls += " win";
+  else if (n.kept) cls += " kept";
+  else cls += " pruned";
+  card.className = cls;
+  card.style.left = `${pos[n.id].x}px`;
+  card.style.top = `${pos[n.id].y}px`;
+
+  const title = document.createElement("div");
+  title.className = "title";
+  title.textContent = n.thought;
+  card.appendChild(title);
+
+  if (n.depth > 0) {
+    const score = document.createElement("div");
+    score.className = "score";
+    score.textContent = `Score: ${n.lowerBound}`;
+    card.appendChild(score);
+  }
+  canvas.appendChild(card);
+}
+
+function drawLine(parent, child, color, width, dashed = false, opacity = 1) {
+  const x1 = pos[parent.id].x + NODE_W;
+  const y1 = pos[parent.id].y + NODE_H / 2;
+  const x2 = pos[child.id].x;
+  const y2 = pos[child.id].y + NODE_H / 2;
+  const cx = (x1 + x2) / 2;
+  const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  p.setAttribute("d", `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+  p.setAttribute("fill", "none");
+  p.setAttribute("stroke", color);
+  p.setAttribute("stroke-width", width);
+  p.setAttribute("opacity", opacity);
+  if (dashed) p.setAttribute("stroke-dasharray", "6,4");
+  svg.appendChild(p);
+}
+
+for (const n of nodes) {
+  if (n.parentId == null) continue;
+  const p = nodes.find(x => x.id === n.parentId);
+  const winningEdge = n.winning && p?.winning;
+  drawLine(
+    p,
+    n,
+    winningEdge ? "#d4a017" : (n.kept ? "#2f7a50" : "#334155"),
+    winningEdge ? 2.4 : 1.4,
+    !n.kept,
+    n.kept ? 1 : 0.35
+  );
+}
+
+document.getElementById("summary").textContent = D.analysis.summary || "";
+</script>
+</body>
+</html>

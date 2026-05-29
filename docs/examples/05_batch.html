@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>05 - 批处理：并行处理 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="并发处理多个请求，使用上下文序列和 GPU 批处理优化吞吐量。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 05 批处理
+			</div>
+			<h1>05 - 批处理：并行处理与性能优化</h1>
+			<div class="meta">
+				<span>难度：中级</span>
+				<span>时长：~20 分钟</span>
+				<span>关键概念：并行执行、GPU 批处理、性能优化</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>概述</h2>
+					<p>本示例演示了使用独立上下文序列（Context Sequences）对多个 LLM 请求进行<strong>并发执行</strong>，这是构建可扩展 AI 代理系统的关键技术。</p>
+				</div>
+
+				<div class="content-section" id="performance-problem">
+					<h2>性能问题</h2>
+					<h3>顺序处理（慢）</h3>
+					<div class="diagram">请求 1 ────────→ 回复 1（2 秒）
+                        ↓
+                    请求 2 ────────→ 回复 2（2 秒）
+                                        ↓
+                                    总计：4 秒</div>
+
+					<h3>并行处理（快）</h3>
+					<div class="diagram">请求 1 ────────→ 回复 1（2 秒）──┐
+                                   ├→ 总计：2 秒
+请求 2 ────────→ 回复 2（2 秒）──┘
+     （两个请求同时运行）</div>
+					<p><strong>性能提升：2 倍加速！</strong></p>
+				</div>
+
+				<div class="content-section" id="context-sequences">
+					<h2>核心概念：上下文序列</h2>
+					<h3>单序列 vs. 多序列</h3>
+					<div class="diagram">┌────────────────────────────────────────────────┐
+│              模型（只加载一次）                   │
+├────────────────────────────────────────────────┤
+│                   上下文                        │
+│  ┌──────────────┐          ┌──────────────┐   │
+│  │   序列 1     │          │   序列 2     │   │
+│  │              │          │              │   │
+│  │   对话历史 A  │          │   对话历史 B  │   │
+│  └──────────────┘          └──────────────┘   │
+└────────────────────────────────────────────────┘</div>
+					<p><strong>关键洞察：</strong>模型权重是共享的（内存高效），每个序列拥有独立的历史记录，序列可以并行处理。</p>
+				</div>
+
+				<div class="content-section" id="promise-all">
+					<h2>并行处理的工作原理</h2>
+					<h3>Promise.all 模式</h3>
+					<div class="diagram">顺序执行：
+────────────────────────────────────
+await fn1();  // 等待 2 秒
+await fn2();  // 再等 2 秒
+总计：4 秒
+
+并行执行：
+────────────────────────────────────
+await Promise.all([
+    fn1(),    // 立即开始
+    fn2()     // 立即开始（不等待！）
+]);
+总计：2 秒（取决于最慢的那个）</div>
+
+					<h3>执行时间线</h3>
+					<div class="diagram">时间 →  0 秒     1 秒     2 秒     3 秒     4 秒
+        │       │       │       │       │
+序列 1：├───────处理中───────┤
+        │                        └─ 回复 1
+        │
+序列 2：├───────处理中───────┤
+                                 └─ 回复 2
+
+        两者都在约 2 秒完成，而不是 4 秒！</div>
+				</div>
+
+				<div class="content-section" id="gpu-batching">
+					<h2>GPU 批处理</h2>
+					<h3>为什么批处理很重要</h3>
+					<div class="diagram">无批处理（低效）
+──────────────────────────────
+GPU：[Token 1] ... 等待 ...
+GPU：[Token 2] ... 等待 ...
+GPU：[Token 3] ... 等待 ...
+     └─ GPU 利用率不足
+
+有批处理（高效）
+─────────────────────────
+GPU：[Tokens 1-1024]  ← 完整批次
+     └─ GPU 充分利用！</div>
+
+					<h3>权衡取舍</h3>
+					<table>
+						<thead>
+							<tr><th></th><th>小批次（如 128）</th><th>大批次（如 2048）</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>内存占用</td><td>更低</td><td>更高</td></tr>
+							<tr><td>灵活性</td><td>更灵活</td><td>较低</td></tr>
+							<tr><td>吞吐量</td><td>较慢</td><td>更快</td></tr>
+							<tr><td>GPU 利用率</td><td>不足</td><td>充分</td></tr>
+						</tbody>
+					</table>
+					<p><strong>最佳平衡点</strong>：消费级 GPU 通常为 512-1024。</p>
+				</div>
+
+				<div class="content-section" id="architecture-patterns">
+					<h2>架构模式</h2>
+
+					<h3>模式 1：多用户服务</h3>
+					<div class="diagram">┌─────────┐  ┌─────────┐  ┌─────────┐
+│ 用户 A  │  │ 用户 B  │  │ 用户 C  │
+└────┬────┘  └────┬────┘  └────┬────┘
+     └────────────┼────────────┘
+                  ↓
+         ┌────────────────┐
+         │   负载均衡器     │
+         └────────────────┘
+                  ↓
+     ┌────────────┼────────────┐
+     ↓            ↓            ↓
+┌─────────┐  ┌─────────┐  ┌─────────┐
+│  序列 1  │  │  序列 2  │  │  序列 3  │
+└─────────┘  └─────────┘  └─────────┘
+     └────────────┼────────────┘
+                  ↓
+         ┌────────────────┐
+         │   共享模型       │
+         └────────────────┘</div>
+
+					<h3>模式 2：多代理系统</h3>
+					<div class="diagram">         ┌──────────────┐
+         │     任务      │
+         └──────┬───────┘
+                │
+       ┌────────┼────────┐
+       ↓        ↓        ↓
+  ┌────────┐ ┌──────┐ ┌──────────┐
+  │规划代理 │ │评审代理│ │ 执行代理  │
+  └───┬────┘ └──┬───┘ └────┬─────┘
+      └─────────┼──────────┘
+                ↓
+       （全部并行运行）</div>
+				</div>
+
+				<div class="content-section" id="resource-management">
+					<h2>资源管理</h2>
+					<h3>内存分配</h3>
+					<div class="diagram">┌──────────────────────────────────┐
+│        总显存：8GB                │
+├──────────────────────────────────┤
+│  模型权重：           4.0 GB     │
+│  上下文基础：         1.0 GB     │
+│  序列 1（KV 缓存）：   0.8 GB     │
+│  序列 2（KV 缓存）：   0.8 GB     │
+│  序列 3（KV 缓存）：   0.8 GB     │
+│  开销：               0.6 GB     │
+├──────────────────────────────────┤
+│  总使用量：           8.0 GB     │
+│  剩余：               0.0 GB     │
+└──────────────────────────────────┘</div>
+
+					<div class="formula-box">
+						<span class="label">内存公式</span>
+						<span class="eq">所需显存 = 模型 + 上下文 + (序列数 x KV缓存)</span>
+					</div>
+				</div>
+
+				<div class="content-section" id="practical-scenarios">
+					<h2>实际场景</h2>
+					<div class="arch-grid">
+						<div class="arch-card">
+							<div class="icon">&#x1F4AC;</div>
+							<h3>聊天机器人服务</h3>
+							<p>100 个用户：顺序处理 200 秒 vs 并行处理（10 序列）20 秒，10 倍加速。</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F4CA;</div>
+							<h3>批量分析</h3>
+							<p>1000 份文档：顺序 50 分钟 vs 并行（8 序列）6.25 分钟，8 倍加速。</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x1F916;</div>
+							<h3>多代理协作</h3>
+							<p>规划者、分析者、执行者协同工作，快速决策而非依次等待。</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="content-section" id="limitations">
+					<h2>限制与注意事项</h2>
+					<ul>
+						<li><strong>上下文容量共享：</strong>序列越多 = 每个序列的历史越少</li>
+						<li><strong>CPU 与 GPU 并行：</strong>GPU 实现真正的并行处理，CPU 交替处理</li>
+						<li><strong>并非总是更快：</strong>仅对独立请求有帮助，对依赖请求无帮助</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="formula">
+					<h2>实用公式</h2>
+					<div class="formula-box">
+						<span class="label">加速比</span>
+						<span class="eq">加速比 = min(序列数量, 可用显存 / 每个序列的内存, GPU 计算限制)</span>
+					</div>
+					<p>通常：设计良好的系统可实现 2-10 倍加速。</p>
+				</div>
+
+				<div class="page-nav">
+					<a href="04_think.html">
+						<div class="label">上一节</div>
+						<div class="name">04 - 思考与推理</div>
+					</a>
+					<a href="06_coding.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">06 - 编码与流式传输</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#performance-problem">性能问题</a></li>
+						<li><a href="#context-sequences">上下文序列</a></li>
+						<li><a href="#promise-all">Promise.all 模式</a></li>
+						<li><a href="#gpu-batching">GPU 批处理</a></li>
+						<li><a href="#architecture-patterns">架构模式</a></li>
+						<li><a href="#resource-management">资源管理</a></li>
+						<li><a href="#practical-scenarios">实际场景</a></li>
+						<li><a href="#limitations">限制与注意事项</a></li>
+						<li><a href="#formula">实用公式</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

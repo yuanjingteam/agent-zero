@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>10 - 思维原子：结构化规划 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="思维原子方法论，用于多步骤计算的原子规划，依赖管理和确定性执行。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 10 思维原子
+			</div>
+			<h1>10 - 思维原子（AoT）：结构化规划</h1>
+			<div class="meta">
+				<span>难度：高级</span>
+				<span>时长：~30 分钟</span>
+				<span>关键概念：AoT、依赖解析、计划验证</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>核心思想</h2>
+					<div class="formula-box">
+						<span class="label">类比</span>
+						<span class="eq">原子思维 = "推理的 SQL"</span>
+					</div>
+					<p>正如 SQL 将复杂的数据操作拆分为原子的、可组合的语句一样，AoT 将推理拆分为最小的、可执行的步骤。</p>
+				</div>
+
+				<div class="content-section" id="what-is-atom">
+					<h2>什么是原子？</h2>
+					<p>原子（atom）是<strong>最小的推理单元</strong>，它：</p>
+					<ol>
+						<li>表达<strong>一个</strong>想法</li>
+						<li>可以<strong>独立验证</strong></li>
+						<li>可以<strong>确定性执行</strong></li>
+						<li><strong>无法隐藏</strong>错误</li>
+					</ol>
+
+					<h3>示例</h3>
+					<p><strong>非原子</strong>（复合语句）：</p>
+					<pre><code>"Search for rooms in Graz and filter by capacity"</code></pre>
+					<p><strong>原子</strong>（独立步骤）：</p>
+					<pre><code>1. Search for rooms in Graz
+2. Filter rooms by minimum capacity of 30</code></pre>
+				</div>
+
+				<div class="content-section" id="three-layers">
+					<h2>三层架构</h2>
+					<div class="diagram">┌─────────────────────────────────┐
+│   LLM（规划层）                   │
+│   - 提出原子化计划                 │
+│   - 不执行                        │
+└─────────────────────────────────┘
+              ↓
+┌─────────────────────────────────┐
+│   验证器（安全层）                 │
+│   - 检查计划结构                   │
+│   - 验证依赖关系                   │
+└─────────────────────────────────┘
+              ↓
+┌─────────────────────────────────┐
+│   执行器（执行层）                 │
+│   - 确定性地运行原子               │
+│   - 管理状态                      │
+└─────────────────────────────────┘</div>
+				</div>
+
+				<div class="content-section" id="why-separation">
+					<h2>为什么分离很重要</h2>
+					<h3>传统 LLM 方法（ReAct）</h3>
+					<div class="diagram">LLM 思考 → LLM 行动 → LLM 思考 → LLM 行动
+**问题：** 执行逻辑存在于模型内部（黑盒）</div>
+
+					<h3>原子思维方法</h3>
+					<div class="diagram">LLM 规划 → 系统验证 → 系统执行
+**优势：** 执行逻辑存在于代码中（白盒）</div>
+				</div>
+
+				<div class="content-section" id="mental-model">
+					<h2>心智模型</h2>
+					<table>
+						<thead>
+							<tr><th>烹饪</th><th>编程</th></tr>
+						</thead>
+						<tbody>
+							<tr><td><strong>食谱</strong>（AoT 计划）</td><td><strong>算法</strong></td></tr>
+							<tr><td>"烧开水"</td><td><code>boilWater()</code></td></tr>
+							<tr><td>"加入意面"</td><td><code>addPasta()</code></td></tr>
+							<tr><td>"煮 8 分钟"</td><td><code>cook(8)</code></td></tr>
+						</tbody>
+					</table>
+					<p>对比：</p>
+					<table>
+						<thead>
+							<tr><th>即兴发挥</th><th>自然语言</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>"做顿晚餐"</td><td>"自己想办法"</td></tr>
+							<tr><td>（自己琢磨）</td><td>（产生幻觉）</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="atom-structure">
+					<h2>原子结构</h2>
+					<pre><code>{
+  "id": 2,
+  "kind": "tool",           // tool | decision | final
+  "name": "multiply",       // operation name
+  "input": {                // explicit inputs
+    "a": "&lt;result_of_1&gt;",   // reference to previous result
+    "b": 3
+  },
+  "dependsOn": [1]          // must wait for atom 1
+}</code></pre>
+					<ul>
+						<li><code>id</code>：确定执行顺序</li>
+						<li><code>kind</code>：分类操作类型</li>
+						<li><code>name</code>：引用可执行函数</li>
+						<li><code>input</code>：使数据流显式化</li>
+						<li><code>dependsOn</code>：声明依赖关系</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="dependency-graph">
+					<h2>依赖图</h2>
+					<p>原子构成一个<strong>有向无环图（DAG）</strong>：</p>
+					<div class="diagram">     ┌─────┐
+     │  1  │ add(15, 7)
+     └──┬──┘
+        │
+     ┌──▼──┐
+     │  2  │ multiply(result_1, 3)
+     └──┬──┘
+        │
+     ┌──▼──┐
+     │  3  │ subtract(result_2, 10)
+     └──┬──┘
+        │
+     ┌──▼──┐
+     │  4  │ final
+     └─────┘</div>
+					<ul>
+						<li>可以按拓扑顺序执行</li>
+						<li>可以并行化独立分支</li>
+						<li>失败时停止在失败的节点</li>
+						<li>易于可视化和调试</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="state-management">
+					<h2>状态管理</h2>
+					<pre><code>const state = {};
+
+// 原子 1 执行后
+state[1] = 22;  // add(15, 7) 的结果
+
+// 原子 2 执行后
+state[2] = 66;  // multiply(22, 3) 的结果
+
+// 原子 3 执行后
+state[3] = 56;  // subtract(66, 10) 的结果</code></pre>
+					<ul>
+						<li>显式（键值映射）</li>
+						<li>每个原子不可变（不覆盖）</li>
+						<li>可追溯（完整历史）</li>
+						<li>可检查（用于调试）</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="comparison">
+					<h2>对比：AoT 与 ReAct</h2>
+					<h3>问题："(15 + 7) * 3 - 10 等于多少？"</h3>
+					<h4>ReAct 输出（文本）：</h4>
+					<pre><code>Thought: I need to add 15 and 7 first
+Action: add(15, 7)
+Observation: 22
+Thought: Now multiply by 3
+Action: multiply(22, 3)
+Observation: 66
+Thought: Finally subtract 10
+Action: subtract(66, 10)
+Observation: 56
+Answer: 56</code></pre>
+
+					<h4>AoT 输出（JSON）：</h4>
+					<pre><code>{
+  "atoms": [
+    {"id": 1, "kind": "tool", "name": "add", "input": {"a": 15, "b": 7}},
+    {"id": 2, "kind": "tool", "name": "multiply", "input": {"a": "&lt;result_of_1&gt;", "b": 3}, "dependsOn": [1]},
+    {"id": 3, "kind": "tool", "name": "subtract", "input": {"a": "&lt;result_of_2&gt;", "b": 10}, "dependsOn": [2]},
+    {"id": 4, "kind": "final", "name": "report", "dependsOn": [3]}
+  ]
+}</code></pre>
+
+					<h3>关键区别</h3>
+					<table>
+						<thead>
+							<tr><th>方面</th><th>ReAct</th><th>AoT</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>格式</td><td>自然语言</td><td>结构化数据</td></tr>
+							<tr><td>验证</td><td>不可能</td><td>执行前验证</td></tr>
+							<tr><td>测试</td><td>模拟整个 LLM</td><td>独立测试执行器</td></tr>
+							<tr><td>调试</td><td>阅读文本</td><td>检查第 N 个原子</td></tr>
+							<tr><td>重放</td><td>重新运行整个对话</td><td>从任意原子重新运行</td></tr>
+							<tr><td>审计轨迹</td><td>对话历史</td><td>数据结构</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="when-to-use">
+					<h2>AoT 的适用场景</h2>
+					<div class="arch-grid">
+						<div class="arch-card">
+							<div class="icon">&#x2705;</div>
+							<h3>非常适合</h3>
+							<p>多步骤工作流、API 编排、金融交易、合规敏感系统、生产环境智能体</p>
+						</div>
+						<div class="arch-card">
+							<div class="icon">&#x274C;</div>
+							<h3>不太适合</h3>
+							<p>创意写作、开放式探索、头脑风暴、单步查询</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="content-section" id="debuggability">
+					<h2>隐藏优势：可调试性</h2>
+					<h3>ReAct 调试</h3>
+					<pre><code>"模型在第 7 次迭代中说了些奇怪的话"
+→ 重新阅读整个对话
+→ 猜测哪里出了问题
+→ 希望不会再发生</code></pre>
+
+					<h3>AoT 调试</h3>
+					<pre><code>"原子 3 失败，错误：'Division by zero'"
+→ 查看原子 3 的输入
+→ 检查这些输入来自哪里（原子 1、2）
+→ 修复工具或添加验证
+→ 从原子 3 重新运行</code></pre>
+				</div>
+
+				<div class="content-section" id="summary">
+					<h2>总结</h2>
+					<p><strong>ReAct 的问题是：</strong>"一个智能体接下来会说什么？"</p>
+					<p><strong>AoT 的问题是：</strong>"最小的、可执行的计划是什么？"</p>
+					<p>对于生产系统，你需要的是第二个问题。</p>
+				</div>
+
+				<div class="page-nav">
+					<a href="09_react.html">
+						<div class="label">上一节</div>
+						<div class="name">09 - ReAct 智能体</div>
+					</a>
+					<a href="11_error.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">11 - 错误处理</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">核心思想</a></li>
+						<li><a href="#what-is-atom">什么是原子</a></li>
+						<li><a href="#three-layers">三层架构</a></li>
+						<li><a href="#why-separation">为什么分离重要</a></li>
+						<li><a href="#mental-model">心智模型</a></li>
+						<li><a href="#atom-structure">原子结构</a></li>
+						<li><a href="#dependency-graph">依赖图</a></li>
+						<li><a href="#state-management">状态管理</a></li>
+						<li><a href="#comparison">AoT vs ReAct</a></li>
+						<li><a href="#when-to-use">适用场景</a></li>
+						<li><a href="#debuggability">可调试性</a></li>
+						<li><a href="#summary">总结</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

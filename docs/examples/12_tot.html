@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>12 - 思维树：搜索推理分支 | 从零开始构建 AI 智能体</title>
+	<meta name="description" content="束搜索遍历多个候选路径，评分剪枝，可视化搜索过程。">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<nav class="nav">
+		<div class="nav-inner">
+			<a href="../index.html" class="nav-logo"><span>&gt;_</span> ai-agents</a>
+			<ul class="nav-links">
+				<li><a href="../index.html#overview">概述</a></li>
+				<li><a href="../index.html#architecture">架构</a></li>
+				<li><a href="../index.html#path">学习路径</a></li>
+				<li><a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<header class="detail-hero">
+		<div class="container">
+			<div class="breadcrumb">
+				<a href="../index.html">首页</a> &gt; <a href="../index.html#path">学习路径</a> &gt; 12 思维树
+			</div>
+			<h1>12 - 思维树（ToT）：搜索推理分支</h1>
+			<div class="meta">
+				<span>难度：高级</span>
+				<span>时长：~30 分钟</span>
+				<span>关键概念：Tree of Thought、束搜索、分支剪枝</span>
+			</div>
+		</div>
+	</header>
+
+	<div class="container">
+		<div class="detail-layout">
+			<main class="detail-main">
+
+				<div class="content-section" id="overview">
+					<h2>思维树：一个人的动机分析</h2>
+					<p><strong>创意：</strong>一个人表现出令人困惑的行为。智能体并行探索多种心理学解释，对其进行评分，然后仅将最强的假设扩展为最终分析。</p>
+				</div>
+
+				<div class="content-section" id="visualization">
+					<h2>可视化树</h2>
+					<div class="diagram">[Behavior: "Person leaves secure job without a clear plan"]
+         |
+    [Phase 1: Branch - 4 hypotheses]
+    /        |         |        \
+[Avoidance][Burnout][Growth][External pressure]
+    |         |          |            |
+[Phase 2: Score]
+   6         9          7            4
+             |
+      [Phase 3: Prune - losers removed]
+             |
+ [Phase 4: Conclusion from ONLY Burnout]</div>
+				</div>
+
+				<div class="content-section" id="what-it-shows">
+					<h2>示例 12 展示的内容</h2>
+					<ol>
+						<li><strong>分支（Branch）：</strong>构建四个相互竞争的心理学假设。</li>
+						<li><strong>评分（Score）：</strong>独立评估每个假设。</li>
+						<li><strong>剪枝（Prune）：</strong>仅保留得分最高的分支。</li>
+						<li><strong>结论（Conclusion）：</strong>仅基于获胜者生成最终分析。</li>
+					</ol>
+					<p>这个示例有意同时展示了思维树的优势（结构化探索）和劣势（剪枝后的信息丢失）。</p>
+				</div>
+
+				<div class="content-section" id="core-principles">
+					<h2>代码中的三个核心原则</h2>
+					<table>
+						<thead>
+							<tr><th>原则</th><th>代码中的实现</th></tr>
+						</thead>
+						<tbody>
+							<tr><td>分支</td><td><code>developHypothesis()</code> 为每个视角创建一个假设</td></tr>
+							<tr><td>评估</td><td><code>scoreHypothesis()</code> 对每个假设进行评分</td></tr>
+							<tr><td>剪枝</td><td><code>pruneHypotheses()</code> 丢弃所有非获胜者</td></tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="content-section" id="structural-flaws">
+					<h2>明确展示的结构性缺陷</h2>
+					<p>最后，控制台会打印出被丢弃的内容。这些分支可能包含纠正性的洞察，但它们不再影响最终结论。</p>
+					<p><strong>这就是严格思维树剪枝的核心局限性。</strong></p>
+				</div>
+
+				<div class="content-section" id="when-to-use">
+					<h2>在实际工作中何时使用思维树</h2>
+					<p>当你需要一个明确的获胜者和简单的决策路径时，使用思维树。</p>
+
+					<h3>系统管理员的心智模型</h3>
+					<p>你收到一个生产告警：发布后 API 延迟从 200 毫秒跳升到 2 秒。</p>
+					<ul>
+						<li><strong>分支：</strong>数据库饱和、缓存击穿风暴、或嘈杂邻居网络问题。</li>
+						<li><strong>评分：</strong>每个分支根据仪表盘和日志进行基于证据的评分。</li>
+						<li><strong>剪枝：</strong>选择置信度最高的原因（例如缓存崩溃）。</li>
+						<li><strong>行动：</strong>首先执行一条补救路径（例如紧急缓存预热 + TTL 回滚）。</li>
+					</ul>
+					<p>为什么适合：事故响应通常需要一条快速、可审计的决策路径。</p>
+
+					<h3>开发者的心智模型</h3>
+					<p>你需要在上线前加速一个缓慢的接口。</p>
+					<ul>
+						<li><strong>分支：</strong>添加 Redis 缓存、用更好的索引重写查询、或异步预计算数据。</li>
+						<li><strong>评分：</strong>按实施工作量、风险、预期收益和可测试性进行评估。</li>
+						<li><strong>剪枝：</strong>选择一个策略立即实施。</li>
+						<li><strong>行动：</strong>上线所选的变更并进行测量。</li>
+					</ul>
+					<p>为什么适合：当截止日期临近时，团队通常需要一个实施赢家。</p>
+
+					<h3>AI 智能体创建者的心智模型</h3>
+					<p>你正在构建一个必须选择修复策略的自主编码智能体。</p>
+					<ul>
+						<li><strong>分支：</strong>最小补丁、更深层次的重构、或回滚 + 防护栏。</li>
+						<li><strong>评分：</strong>按失败风险、爆炸半径以及来自代码仓库证据的置信度进行排名。</li>
+						<li><strong>剪枝：</strong>保留一个执行计划。</li>
+						<li><strong>行动：</strong>执行、验证并报告。</li>
+					</ul>
+				</div>
+
+				<div class="content-section" id="summary">
+					<h2>总结</h2>
+					<p>思维树在以下情况下最为强大：</p>
+					<ul>
+						<li>时间有限</li>
+						<li>输出应是一个可执行的方向</li>
+						<li>且维护多个替代方案的成本高于丢失细微差别的风险</li>
+					</ul>
+				</div>
+
+				<div class="page-nav">
+					<a href="11_error.html">
+						<div class="label">上一节</div>
+						<div class="name">11 - 错误处理</div>
+					</a>
+					<a href="13_got.html" class="next">
+						<div class="label">下一节</div>
+						<div class="name">13 - 思维图</div>
+					</a>
+				</div>
+
+			</main>
+
+			<aside class="detail-sidebar">
+				<div class="toc">
+					<h4>目录</h4>
+					<ul>
+						<li><a href="#overview">概述</a></li>
+						<li><a href="#visualization">可视化树</a></li>
+						<li><a href="#what-it-shows">展示内容</a></li>
+						<li><a href="#core-principles">核心原则</a></li>
+						<li><a href="#structural-flaws">结构性缺陷</a></li>
+						<li><a href="#when-to-use">何时使用</a></li>
+						<li><a href="#summary">总结</a></li>
+					</ul>
+				</div>
+			</aside>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="container">
+			<p>为想要真正理解 AI 智能体的人而用心打造</p>
+			<p style="margin-top: 0.5rem;">
+				<a href="https://github.com/yuanjingteam/AgentZero" target="_blank">GitHub</a>
+				&nbsp;&middot;&nbsp;
+				<a href="https://yuanjingteam.github.io/agent-zero/" target="_blank">配套网站</a>
+			</p>
+		</div>
+	</footer>
+</body>
+</html>

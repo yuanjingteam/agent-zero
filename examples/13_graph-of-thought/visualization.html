@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>思维图 — 动机分析</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; }
+  header { padding: 22px 32px 14px; border-bottom: 1px solid #1e2535; }
+  header h1 { font-size: 1.25rem; color: #f8fafc; }
+  header p { margin-top: 4px; font-size: .84rem; color: #94a3b8; }
+
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    padding: 10px 32px; background: #141820; border-bottom: 1px solid #1e2535;
+  }
+  .legend { display: flex; gap: 14px; font-size: .75rem; color: #94a3b8; flex-wrap: wrap; }
+  .leg-item { display: flex; align-items: center; gap: 6px; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid; }
+
+  #canvas-wrap { padding: 24px 32px 18px; overflow: auto; }
+  #canvas { position: relative; min-height: 980px; min-width: 1620px; }
+  #links { position: absolute; inset: 0; pointer-events: none; }
+  .edge { transition: stroke .12s, stroke-width .12s, opacity .12s; }
+  .edge.dim { opacity: 0.12; }
+  .edge.active {
+    stroke: #f6e05e;
+    stroke-width: 2.6;
+    opacity: 1;
+  }
+  .stage { position: absolute; top: 0; font-size: .68rem; color: #64748b; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+
+  .node {
+    position: absolute; width: 240px; border-radius: 10px; border: 1.5px solid #2d3748;
+    background: #161c27; padding: 10px 11px; transition: transform .12s;
+  }
+  .node:hover { transform: translateY(-1px); }
+  .node.root { background: #172033; border-color: #3b82f6; }
+  .node.hypothesis { background: #1a202c; border-color: #475569; }
+  .node.contrast { background: #1f170a; border-color: #b7791f; }
+  .node.refined { background: #132025; border-color: #0ea5a6; }
+  .node.synthesis { background: #15231a; border-color: #2f7a50; }
+  .node.conclusion { background: #1e1600; border-color: #d4a017; border-width: 2px; }
+  .meta { font-size: .66rem; color: #93a0b3; margin-bottom: 6px; }
+  .text { font-size: .77rem; line-height: 1.45; color: #e2e8f0; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .score { display: inline-block; margin-top: 7px; font-size: .65rem; color: #a0aec0; border: 1px solid #334155; border-radius: 999px; padding: 2px 7px; }
+
+  #result {
+    margin: 0 32px 28px; border: 1px solid #1e2535; border-radius: 10px; background: #141820; padding: 16px 18px;
+  }
+  #result h2 { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
+  .label { margin-top: 9px; margin-bottom: 4px; color: #8aa0bb; font-size: .74rem; }
+  .body { font-size: .84rem; line-height: 1.62; color: #dbe7f5; }
+  ul { margin-left: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>思维图 — 动机分析</h1>
+  <p>通过多父节点进行分支、评分、对比、精炼、聚合，并得出结论。</p>
+</header>
+
+<div class="topbar">
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot" style="background:#172033;border-color:#3b82f6"></span>根节点</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1a202c;border-color:#475569"></span>假设</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1f170a;border-color:#b7791f"></span>对比</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#132025;border-color:#0ea5a6"></span>精炼</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#15231a;border-color:#2f7a50"></span>综合</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1e1600;border-color:#d4a017"></span>结论</span>
+  </div>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas">
+    <svg id="links"></svg>
+  </div>
+</div>
+
+<section id="result">
+  <h2>最终结论</h2>
+  <div class="label">核心动机</div>
+  <div class="body" id="core"></div>
+  <div class="label">心理画像</div>
+  <div class="body" id="picture"></div>
+  <div class="label">矛盾之处作为信号</div>
+  <div class="body" id="contradictions"></div>
+  <div class="label">建议</div>
+  <div class="body" id="recommendation"></div>
+  <div class="label">思维树可能遗漏的内容</div>
+  <ul class="body" id="missed"></ul>
+</section>
+
+<script>
+const D = {"nodes":[{"id":"n1","type":"root","content":"一位34岁的女性辞去稳定的办公室工作，疏远朋友，开始每天长时间独自散步，且不解释原因。","score":0,"parentIds":[]},{"id":"n2","type":"hypothesis","content":"该女性辞去稳定工作并退出社交互动可能表明一种回避动机，即逃避负面情绪或经历。她长时间的独自散步可能是回避面对或处理这些情绪的方式。她对自身行为缺乏解释，可能暗示着希望避免审视或评判。","score":7.4,"parentIds":["n1"]},{"id":"n3","type":"hypothesis","content":"该女性辞职、疏远朋友和长时间独自散步可能表明情感耗竭和倦怠。这些行为在经历长期压力和情感枯竭的个体中很常见。","score":8.8,"parentIds":["n1"]},{"id":"n4","type":"hypothesis","content":"该女性辞去稳定工作并退出社交互动可能表明她正在转向个人成长和自我提升，可能在探索新经历或解决潜在问题。她的独自散步可能是一种自我反思或体育锻炼的形式，支持这种成长动机。","score":8.1,"parentIds":["n1"]},{"id":"n5","type":"hypothesis","content":"该女性辞去稳定工作、疏远朋友和增加独自散步可能受到外部社会压力的影响，如家庭期望、社会规范或同伴压力。这些行为可能表明她的社会认同发生了转变，或是对外部评价的回应。","score":6.7,"parentIds":["n1"]},{"id":"n6","type":"contrast","content":"两个假设对同一行为提出了相互矛盾的解释：一个将该女性的行为归因于长期压力导致的情感耗竭和倦怠，另一个则认为这是个人成长和自我提升的信号。这种矛盾凸显了通过心理学视角解读个体行为的复杂性。","score":0,"parentIds":["n3","n4"]},{"id":"n7","type":"contrast","content":"假设A将该女性的行为归因于内在的情感耗竭和倦怠，而假设B则将其归因于外部社会压力和认同转变。这种矛盾凸显了内在心理状态与外部社会影响对行为作用之间的张力。","score":0,"parentIds":["n3","n5"]},{"id":"n8","type":"refined","content":"该女性辞职、疏远朋友和长时间独自散步可能反映了情感耗竭和倦怠，这通常与长期压力和情感枯竭有关。这些行为可能受到外部社会压力（如家庭期望或社会规范）的影响，但也突显了她社会认同的转变和对内在情感需求的回应。","score":0,"parentIds":["n5","n3"]},{"id":"n9","type":"refined","content":"该女性辞去稳定工作并退出社交互动可能表明一种回避动机，即逃避负面情绪或经历。她长时间的独自散步可能是回避面对或处理这些情绪的方式。她对自身行为缺乏解释，可能暗示着希望避免审视或评判。然而，更丰富的背景信息提供了额外的洞察，表明这些行为可能与情感耗竭和倦怠有关，缺乏明确解释可能反映的是自我反思和个人成长的需求，而非回避。","score":0,"parentIds":["n2","n6"]},{"id":"n10","type":"synthesis","content":"该女性辞职、退缩和独自散步的行为反映了情感耗竭和倦怠之间的复杂交互，同时也可能体现个人成长和自我提升的迹象。情感耗竭表明长期压力和枯竭，而另一视角则突显了向自我反思和探索的积极转变，表明她的行为可能具有双重目的：既是痛苦的指标，也是有意识改变的标志。","score":0,"parentIds":["n3","n4","n6"]},{"id":"n11","type":"synthesis","content":"该女性辞职、退缩和独自散步的行为可能反映了内在情感耗竭与外部社会压力之间的复杂交互。虽然她的行为起初看似回避，但也可能表明她社会认同的转变和对长期压力的回应，暗示着自我反思和个人成长的需求。这种综合分析整合了内在和外在因素，突显了心理状态与社会影响之间的相互依存关系。","score":0,"parentIds":["n8","n9","n7"]},{"id":"n12","type":"conclusion","content":"该女性的行为反映了情感耗竭、倦怠和个人潜能成长之间的复杂交互，解读中的矛盾凸显了对其心理状态进行细致理解的必要性。","score":0,"parentIds":["n10","n11","n6","n7","n8"]}],"conclusion":{"id":"n12","core_motivation":"该女性的行为反映了情感耗竭、倦怠和个人潜能成长之间的复杂交互，解读中的矛盾凸显了对其心理状态进行细致理解的必要性。","psychological_picture":"该女性通过辞职、退缩和独处表现出情感耗竭和倦怠的迹象，但这些行为也可能暗示着向自我反思和探索的转变。将她的行为归因于痛苦或个人成长之间的矛盾突显了她心理状态的多面性，受内在和外在因素的共同影响。她的行为可能是对长期压力、社会压力或有意识自我提升尝试的回应，每种解读都为理解她的动机和潜在心理动态提供了不同的视角。","contradictions_as_signal":"解读中的矛盾作为心理状态复杂性的诊断信号，表明单一行为可能受到多种因素的影响，全面评估需要同时考虑内在和外在影响。矛盾的存在表明个体的动机并非单一的，深入分析必须考虑不同心理过程和社会背景之间的交互作用。","recommendation":"建议进行全面的心理评估，以探索情感耗竭和倦怠的可能性，以及个人成长和自我反思的潜力。评估应包括对个体社会环境、压力源和变化潜力的详细评价，同时考虑外部压力在塑造其行为中的作用。","what_tot_missed":["洞察一：社会支持系统在该女性行为中的作用及其对她情感状态的潜在影响","洞察二：从倦怠转向自我提升的可能性以及可能促进这种转变的因素","洞察三：文化或社会规范对她决定退缩和独自散步的影响"]}};
+const canvas = document.getElementById("canvas");
+const svg = document.getElementById("links");
+
+const typeToCol = {
+  root: 0,
+  hypothesis: 1,
+  contrast: 2,
+  refined: 3,
+  synthesis: 4,
+  conclusion: 5
+};
+const colTitle = {
+  0: "根节点",
+  1: "阶段 1-2：分支/评分",
+  2: "阶段 3：对比",
+  3: "阶段 4：精炼",
+  4: "阶段 5：综合",
+  5: "阶段 6：结论"
+};
+
+const COL_X = [30, 320, 610, 900, 1190, 1480];
+const NODE_W = 240;
+const NODE_H = 92;
+const ROW_GAP = 156;
+
+const cols = {};
+for (const n of D.nodes) {
+  const c = typeToCol[n.type] ?? 1;
+  if (!cols[c]) cols[c] = [];
+  cols[c].push(n);
+}
+
+const pos = {};
+for (const [col, arr] of Object.entries(cols)) {
+  arr.forEach((n, idx) => {
+    pos[n.id] = { x: COL_X[col], y: 36 + idx * ROW_GAP };
+  });
+}
+
+const maxY = Math.max(...Object.values(pos).map(p => p.y));
+canvas.style.height = `${maxY + NODE_H + 34}px`;
+svg.setAttribute("width", canvas.clientWidth);
+svg.setAttribute("height", canvas.clientHeight);
+
+for (const [col, title] of Object.entries(colTitle)) {
+  const t = document.createElement("div");
+  t.className = "stage";
+  t.style.left = `${COL_X[col]}px`;
+  t.textContent = title;
+  canvas.appendChild(t);
+}
+
+for (const n of D.nodes) {
+  const card = document.createElement("div");
+  card.className = `node ${n.type}`;
+  card.dataset.nodeId = n.id;
+  card.style.left = `${pos[n.id].x}px`;
+  card.style.top = `${pos[n.id].y}px`;
+  const parents = n.parentIds.length ? n.parentIds.join(", ") : "root";
+  card.innerHTML =
+    "<div class='meta'>[" + n.id + "] " + n.type + " | parents: " + parents + "</div>" +
+    "<div class='text'>" + n.content + "</div>" +
+    (n.score > 0 ? `<div class='score'>Score: ${n.score}</div>` : "");
+  canvas.appendChild(card);
+}
+
+function draw(parentId, childId) {
+  const p = pos[parentId];
+  const c = pos[childId];
+  if (!p || !c) return;
+  const x1 = p.x + NODE_W;
+  const y1 = p.y + NODE_H / 2;
+  const x2 = c.x;
+  const y2 = c.y + NODE_H / 2;
+  const cx = (x1 + x2) / 2;
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "#334155");
+  path.setAttribute("stroke-width", "1.4");
+  path.setAttribute("opacity", "0.75");
+  path.setAttribute("class", "edge");
+  path.dataset.parentId = parentId;
+  path.dataset.childId = childId;
+  svg.appendChild(path);
+}
+
+for (const n of D.nodes) {
+  for (const pId of n.parentIds) {
+    draw(pId, n.id);
+  }
+}
+
+const edgeEls = [...document.querySelectorAll(".edge")];
+const nodeEls = [...document.querySelectorAll(".node")];
+
+function clearEdgeHighlight() {
+  edgeEls.forEach((e) => {
+    e.classList.remove("active", "dim");
+  });
+}
+
+function highlightEdgesForNode(nodeId) {
+  edgeEls.forEach((e) => {
+    const isConnected = e.dataset.parentId === nodeId || e.dataset.childId === nodeId;
+    if (isConnected) {
+      e.classList.add("active");
+      e.classList.remove("dim");
+    } else {
+      e.classList.remove("active");
+      e.classList.add("dim");
+    }
+  });
+}
+
+nodeEls.forEach((nodeEl) => {
+  nodeEl.addEventListener("mouseenter", () => {
+    highlightEdgesForNode(nodeEl.dataset.nodeId);
+  });
+  nodeEl.addEventListener("mouseleave", () => {
+    clearEdgeHighlight();
+  });
+});
+
+document.getElementById("core").textContent = D.conclusion.core_motivation || "";
+document.getElementById("picture").textContent = D.conclusion.psychological_picture || "";
+document.getElementById("contradictions").textContent = D.conclusion.contradictions_as_signal || "";
+document.getElementById("recommendation").textContent = D.conclusion.recommendation || "";
+const missed = document.getElementById("missed");
+for (const item of (D.conclusion.what_tot_missed || [])) {
+  const li = document.createElement("li");
+  li.textContent = item;
+  missed.appendChild(li);
+}
+</script>
+</body>
+</html>
