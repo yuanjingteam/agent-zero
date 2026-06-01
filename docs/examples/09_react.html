@@ -6,6 +6,7 @@
 	<title>09 - ReAct 智能体：推理 + 行动 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="推理-行动-观察循环，迭代式问题解决，自我纠错，现代智能体框架的基础。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -51,32 +52,7 @@
 
 				<div class="content-section" id="core-pattern">
 					<h2>核心模式</h2>
-					<div class="diagram">┌─────────────┐
-│    问题     │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────────────┐
-│          ReAct 循环                 │
-│                                     │
-│  ┌──────────────────────────────┐  │
-│  │  1. 思考（THOUGHT）          │  │
-│  │  "我需要做什么？"            │  │
-│  └─────────────┬────────────────┘  │
-│                ▼                    │
-│  ┌──────────────────────────────┐  │
-│  │  2. 行动（ACTION）           │  │
-│  │  调用工具并传入参数          │  │
-│  └─────────────┬────────────────┘  │
-│                ▼                    │
-│  ┌──────────────────────────────┐  │
-│  │  3. 观察（OBSERVATION）      │  │
-│  │  接收工具返回结果            │  │
-│  └─────────────┬────────────────┘  │
-│                │                    │
-│                └──► 重复或          │
-│                     最终答案        │
-└─────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":600,"height":420,"title":"ReAct Core Pattern","nodes":[{"id":"problem","x":225,"y":20,"w":150,"h":50,"label":"问题","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.10)"}},{"id":"loop","x":75,"y":90,"w":450,"h":280,"label":"ReAct 循环","style":{"fill":"#111114","stroke":"rgba(184,196,208,0.25)","radius":12}},{"id":"thought","x":125,"y":115,"w":350,"h":65,"label":"1. 思考（THOUGHT）","sublabel":"\"我需要做什么？\"","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.25)","radius":8}},{"id":"action","x":125,"y":200,"w":350,"h":65,"label":"2. 行动（ACTION）","sublabel":"调用工具并传入参数","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.25)","radius":8}},{"id":"observe","x":125,"y":285,"w":350,"h":65,"label":"3. 观察（OBSERVATION）","sublabel":"接收工具返回结果","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.25)","radius":8}}],"arrows":[{"from":"problem","to":"loop","direction":"down","style":{"color":"rgba(255,255,255,0.15)"}},{"from":"thought","to":"action","direction":"down","style":{"color":"rgba(184,196,208,0.35)"}},{"from":"action","to":"observe","direction":"down","style":{"color":"rgba(184,196,208,0.35)"}}],"labels":[{"x":530,"y":350,"text":"重复或最终答案","color":"#A0A0A8","size":"11","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="why-important">
@@ -115,23 +91,7 @@
 
 				<div class="content-section" id="full-example">
 					<h2>完整示例</h2>
-					<div class="diagram">问题："如果 15 件商品每件 $8，20 件商品每件 $8，
-      总收入是多少？"
-
-Thought: 首先我需要计算 15 件商品的收入
-Action: multiply(15, 8)
-Observation: 120
-
-Thought: 现在我需要计算 20 件商品的收入
-Action: multiply(20, 8)
-Observation: 160
-
-Thought: 现在我需要将两项收入相加
-Action: add(120, 160)
-Observation: 280
-
-Thought: 我已经得到了最终答案
-Answer: 总收入为 $280</div>
+					<div class="diagram" data-diagram='{"width":600,"height":620,"title":"ReAct Full Example","nodes":[{"id":"q","x":150,"y":20,"w":300,"h":55,"label":"问题：15件×$8 + 20件×$8","sublabel":"总收入是多少？","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.10)"}},{"id":"s1","x":150,"y":110,"w":300,"h":70,"label":"Thought: 计算15件商品收入","sublabel":"Action: multiply(15,8) → 120","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"s2","x":150,"y":215,"w":300,"h":70,"label":"Thought: 计算20件商品收入","sublabel":"Action: multiply(20,8) → 160","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"s3","x":150,"y":320,"w":300,"h":70,"label":"Thought: 将两项收入相加","sublabel":"Action: add(120,160) → 280","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"s4","x":150,"y":425,"w":300,"h":55,"label":"Thought: 已得到最终答案","sublabel":"Answer: 总收入为 $280","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)"}},{"id":"ans","x":225,"y":520,"w":150,"h":50,"label":"总收入 $280","style":{"fill":"rgba(74,222,128,0.3)","stroke":"rgba(74,222,128,0.6)"}}],"arrows":[{"from":"q","to":"s1","direction":"down","style":{"color":"rgba(255,255,255,0.15)"}},{"from":"s1","to":"s2","direction":"down","style":{"color":"rgba(96,165,250,0.35)"}},{"from":"s2","to":"s3","direction":"down","style":{"color":"rgba(96,165,250,0.35)"}},{"from":"s3","to":"s4","direction":"down","style":{"color":"rgba(96,165,250,0.35)"}},{"from":"s4","to":"ans","direction":"down","style":{"color":"rgba(74,222,128,0.5)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="comparison">
@@ -165,40 +125,7 @@ LLM："让我逐步思考：
 
 				<div class="content-section" id="architecture-diagram">
 					<h2>架构图</h2>
-					<div class="diagram">┌──────────────────────────────────────┐
-│          用户问题                     │
-└──────────────┬───────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────┐
-│      使用 ReAct 提示词的 LLM          │
-│                                      │
-│  "思考、行动、观察模式"               │
-└──────┬───────────────────────────────┘
-       │
-       ├──► 生成："Thought: ..."
-       │
-       ├──► 生成："Action: tool(params)"
-       │         │
-       │         ▼
-       │    ┌─────────────────┐
-       │    │  工具执行器      │
-       │    │                 │
-       │    │  - multiply()   │
-       │    │  - add()        │
-       │    │  - divide()     │
-       │    │  - subtract()   │
-       │    └─────────┬───────┘
-       │              │
-       │              ▼
-       └───────── "Observation: result"
-       │
-       ├──► 下一次迭代或最终答案
-       │
-       ▼
-┌──────────────────────────────────────┐
-│         最终答案                      │
-└──────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":600,"height":620,"title":"ReAct Architecture","nodes":[{"id":"uq","x":225,"y":15,"w":150,"h":50,"label":"用户问题","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.10)"}},{"id":"llm","x":150,"y":105,"w":300,"h":65,"label":"使用 ReAct 提示词的 LLM","sublabel":"思考、行动、观察模式","style":{"fill":"#111114","stroke":"rgba(184,196,208,0.25)"}},{"id":"thought","x":150,"y":215,"w":300,"h":50,"label":"Thought: ...","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.25)"}},{"id":"action","x":150,"y":310,"w":300,"h":50,"label":"Action: tool(params)","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.25)"}},{"id":"tool","x":150,"y":410,"w":300,"h":80,"label":"工具执行器","sublabel":"multiply / add / divide / subtract","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)"}},{"id":"result","x":150,"y":535,"w":300,"h":50,"label":"Observation: result","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"uq","to":"llm","direction":"down","label":"输入问题","style":{"color":"rgba(255,255,255,0.15)"}},{"from":"llm","to":"thought","direction":"down","style":{"color":"rgba(184,196,208,0.35)"}},{"from":"thought","to":"action","direction":"down","style":{"color":"rgba(184,196,208,0.35)"}},{"from":"action","to":"tool","direction":"down","label":"调用工具","style":{"color":"rgba(251,191,36,0.5)"}},{"from":"tool","to":"result","direction":"down","label":"返回结果","style":{"color":"rgba(74,222,128,0.5)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="implementation">
@@ -223,17 +150,10 @@ Answer: [final answer]`</code></pre>
 				<div class="content-section" id="advanced-patterns">
 					<h2>高级模式</h2>
 					<h3>自我纠错</h3>
-					<div class="diagram">Thought: 这个结果看起来不对
-Action: verify(previous_result)
-Observation: 检测到错误
-Thought: 让我重新计算
-Action: multiply(15, 8)  # 重试</div>
+					<div class="diagram" data-diagram='{"width":600,"height":400,"title":"ReAct Self-Correction","nodes":[{"id":"t1","x":150,"y":20,"w":300,"h":50,"label":"Thought: 结果看起来不对","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)"}},{"id":"verify","x":150,"y":105,"w":300,"h":50,"label":"Action: verify(previous_result)","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)"}},{"id":"err","x":150,"y":190,"w":300,"h":50,"label":"Observation: 检测到错误","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.3)"}},{"id":"t2","x":150,"y":275,"w":300,"h":50,"label":"Thought: 让我重新计算","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)"}},{"id":"retry","x":150,"y":335,"w":300,"h":50,"label":"Action: multiply(15, 8)  # 重试","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"t1","to":"verify","direction":"down","style":{"color":"rgba(251,191,36,0.5)"}},{"from":"verify","to":"err","direction":"down","style":{"color":"rgba(251,191,36,0.5)"}},{"from":"err","to":"t2","direction":"down","style":{"color":"rgba(248,113,113,0.5)"}},{"from":"t2","to":"retry","direction":"down","style":{"color":"rgba(74,222,128,0.5)"}}]}'></div>
 
 					<h3>元推理（Meta-Reasoning）</h3>
-					<div class="diagram">Thought: 我已经用了 5 次迭代，应该尽快结束
-Action: summarize_progress()
-Observation: 仍需将最后的数字相加
-Thought: 再做一步应该就可以了</div>
+					<div class="diagram" data-diagram='{"width":600,"height":400,"title":"ReAct Meta-Reasoning","nodes":[{"id":"t1","x":150,"y":20,"w":300,"h":50,"label":"Thought: 已用5次迭代，应尽快结束","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)"}},{"id":"summarize","x":150,"y":105,"w":300,"h":50,"label":"Action: summarize_progress()","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)"}},{"id":"obs","x":150,"y":190,"w":300,"h":50,"label":"Observation: 仍需将最后数字相加","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"t2","x":150,"y":275,"w":300,"h":50,"label":"Thought: 再做一步应该就可以了","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"t1","to":"summarize","direction":"down","style":{"color":"rgba(251,191,36,0.5)"}},{"from":"summarize","to":"obs","direction":"down","style":{"color":"rgba(96,165,250,0.5)"}},{"from":"obs","to":"t2","direction":"down","style":{"color":"rgba(74,222,128,0.5)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="research">

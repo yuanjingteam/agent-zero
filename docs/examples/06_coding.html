@@ -6,6 +6,7 @@
 	<title>06 - 编码：流式传输与响应控制 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="实时流式响应，Token 预算管理，渐进式输出显示，优化用户体验。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -46,74 +47,27 @@
 				<div class="content-section" id="streaming-problem">
 					<h2>流式传输问题</h2>
 					<h3>传统（非流式）方式</h3>
-					<div class="diagram">用户发送提示词
-       ↓
-   [等待 10 秒...]
-       ↓
-完整响应一次性出现</div>
+					<div class="diagram" data-diagram='{"width":520,"height":260,"title":"Non-Streaming","nodes":[{"id":"user","x":170,"y":15,"w":180,"h":50,"label":"用户发送提示词","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"13"}},{"id":"wait","x":170,"y":105,"w":180,"h":50,"label":"等待 10 秒...","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"13","fill":"#18181C"}},{"id":"resp","x":170,"y":195,"w":180,"h":50,"label":"完整响应一次性出现","style":{"stroke":"rgba(248,113,113,0.3)","fontSize":"13"}}],"arrows":[{"from":"user","to":"wait","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"wait","to":"resp","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}}]}'></div>
 					<p><strong>问题：</strong>用户体验差（长时间等待）、无进度指示、无法中断错误响应。</p>
 
 					<h3>流式方式（本示例）</h3>
-					<div class="diagram">用户发送提示词
-       ↓
-"Hoisting" (0.1 秒) → 用户看到第一个词！
-       ↓
-"is a" (0.2 秒) → 更多文本出现
-       ↓
-"JavaScript" (0.3 秒) → 持续反馈
-       ↓
-[逐 token 继续...]</div>
+					<div class="diagram" data-diagram='{"width":600,"height":340,"title":"Streaming","nodes":[{"id":"user","x":200,"y":10,"w":200,"h":44,"label":"用户发送提示词","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"13"}},{"id":"t1","x":200,"y":84,"w":200,"h":36,"label":"\"Hoisting\" (0.1s)","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"t2","x":200,"y":140,"w":200,"h":36,"label":"\"is a\" (0.2s)","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"t3","x":200,"y":196,"w":200,"h":36,"label":"\"JavaScript\" (0.3s)","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"t4","x":200,"y":252,"w":200,"h":36,"label":"逐 token 继续...","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.15)","fontSize":"11"}}],"arrows":[{"from":"user","to":"t1","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"t1","to":"t2","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"t2","to":"t3","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"t3","to":"t4","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}],"labels":[{"x":470,"y":100,"text":"用户看到第一个词！","color":"rgba(74,222,128,0.7)","anchor":"start","size":"10"},{"x":470,"y":156,"text":"更多文本出现","color":"rgba(74,222,128,0.7)","anchor":"start","size":"10"},{"x":470,"y":212,"text":"持续反馈","color":"rgba(74,222,128,0.7)","anchor":"start","size":"10"}]}'></div>
 					<p><strong>优势：</strong>即时反馈、进度可见、可提前中断、感觉互动性强。</p>
 				</div>
 
 				<div class="content-section" id="how-streaming-works">
 					<h2>流式工作原理</h2>
 					<h3>逐 Token 生成</h3>
-					<div class="diagram">LLM 内部过程：
-┌─────────────────────────────────────┐
-│  Token 1: "Hoisting"                │
-│  Token 2: "is"                      │
-│  Token 3: "a"                       │
-│  Token 4: "JavaScript"              │
-│  Token 5: "mechanism"               │
-│  ...                                │
-└─────────────────────────────────────┘
-
-无流式：                有流式：
-等待所有 token            立即发出每个 token
-└─→ 缓冲 → 返回        └─→ 回调 → 显示</div>
+					<div class="diagram" data-diagram='{"width":700,"height":310,"title":"Token Generation","nodes":[{"id":"box","x":30,"y":10,"w":300,"h":160,"label":"LLM 内部过程","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"13","fontWeight":"600"}},{"id":"tok1","x":50,"y":40,"w":260,"h":24,"label":"Token 1: \"Hoisting\"","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"10","mono":true}},{"id":"tok2","x":50,"y":68,"w":260,"h":24,"label":"Token 2: \"is\"","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"10","mono":true}},{"id":"tok3","x":50,"y":96,"w":260,"h":24,"label":"Token 3: \"a\"","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"10","mono":true}},{"id":"tok4","x":50,"y":124,"w":260,"h":24,"label":"Token 4: \"JavaScript\"","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"10","mono":true}},{"id":"nostr","x":400,"y":30,"w":270,"h":60,"label":"无流式：等待所有 token","style":{"stroke":"rgba(248,113,113,0.3)","fontSize":"12"}},{"id":"buf","x":420,"y":100,"w":100,"h":40,"label":"缓冲","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)","fontSize":"11"}},{"id":"ret1","x":540,"y":100,"w":110,"h":40,"label":"返回","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)","fontSize":"11"}},{"id":"yesstr","x":400,"y":190,"w":270,"h":60,"label":"有流式：立即发出每个 token","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"12"}},{"id":"cb","x":420,"y":260,"w":100,"h":40,"label":"回调","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"show","x":540,"y":260,"w":110,"h":40,"label":"显示","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}}],"arrows":[{"from":"nostr","to":"buf","direction":"right","style":{"color":"rgba(248,113,113,0.3)"}},{"from":"buf","to":"ret1","direction":"right","style":{"color":"rgba(248,113,113,0.3)"}},{"from":"yesstr","to":"cb","direction":"right","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"cb","to":"show","direction":"right","style":{"color":"rgba(74,222,128,0.3)"}}]}'></div>
 
 					<h3>onTextChunk 回调</h3>
-					<div class="diagram">┌────────────────────────────────────┐
-│        模型生成                     │
-└────────────┬───────────────────────┘
-             │
-    ┌────────┴─────────┐
-    │  每个新 token     │
-    └────────┬─────────┘
-             ↓
-    ┌────────────────────┐
-    │ onTextChunk(text)  │  ← 你的回调
-    └────────┬───────────┘
-             ↓
-    你的代码处理它：
-    • 显示给用户
-    • 通过网络发送
-    • 记录到文件
-    • 分析内容</div>
+					<div class="diagram" data-diagram='{"width":520,"height":380,"title":"onTextChunk Callback","nodes":[{"id":"gen","x":160,"y":10,"w":200,"h":50,"label":"模型生成","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"13","fontWeight":"600"}},{"id":"token","x":160,"y":95,"w":200,"h":44,"label":"每个新 token","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"12"}},{"id":"cb","x":160,"y":175,"w":200,"h":44,"label":"onTextChunk(text)","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12","mono":true}},{"id":"code","x":160,"y":260,"w":200,"h":44,"label":"你的代码处理它","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"12"}}],"arrows":[{"from":"gen","to":"token","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"token","to":"cb","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"cb","to":"code","direction":"down","style":{"color":"rgba(96,165,250,0.3)"}}],"labels":[{"x":400,"y":270,"text":"• 显示给用户","color":"#A0A0A8","anchor":"start","size":"11"},{"x":400,"y":288,"text":"• 通过网络发送","color":"#A0A0A8","anchor":"start","size":"11"},{"x":400,"y":306,"text":"• 记录到文件","color":"#A0A0A8","anchor":"start","size":"11"},{"x":400,"y":324,"text":"• 分析内容","color":"#A0A0A8","anchor":"start","size":"11"}]}'></div>
 				</div>
 
 				<div class="content-section" id="max-tokens">
 					<h2>Token 限制：maxTokens</h2>
 					<h3>Token 预算</h3>
-					<div class="diagram">上下文窗口：4096 个 token
-├─ 系统提示词：200 个 token
-├─ 用户消息：100 个 token
-├─ 响应（maxTokens）：2000 个 token
-└─ 剩余用于历史记录：1796 个 token
-
-总使用量：2300 个 token
-可用量：1796 个 token 用于未来对话</div>
+					<div class="diagram" data-diagram='{"width":560,"height":290,"title":"Token Budget","nodes":[{"id":"win","x":30,"y":10,"w":500,"h":180,"label":"上下文窗口：4096 个 token","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"13","fontWeight":"600"}},{"id":"sys","x":55,"y":45,"w":450,"h":32,"label":"系统提示词：200 个 token","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.2)","fontSize":"11"}},{"id":"usr","x":55,"y":83,"w":450,"h":32,"label":"用户消息：100 个 token","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.2)","fontSize":"11"}},{"id":"resp","x":55,"y":121,"w":450,"h":32,"label":"响应（maxTokens）：2000 个 token","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"hist","x":55,"y":159,"w":450,"h":24,"label":"剩余用于历史记录：1796 个 token","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"10","textColor":"#6B6B74"}}],"labels":[{"x":30,"y":220,"text":"总使用量：2300 个 token","color":"#A0A0A8","anchor":"start","size":"12"},{"x":30,"y":242,"text":"可用量：1796 个 token 用于未来对话","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"}]}'></div>
 
 					<h3>成本与质量</h3>
 					<table>
@@ -132,52 +86,19 @@
 				<div class="content-section" id="use-cases">
 					<h2>实时应用场景</h2>
 					<h3>模式 1：交互式 CLI</h3>
-					<div class="diagram">用户："解释闭包"
-       ↓
-终端："A closure is a function..."
-      （逐字出现，像打字一样）
-       ↓
-用户看到进度，知道正在处理</div>
+					<div class="diagram" data-diagram='{"width":520,"height":260,"title":"Interactive CLI","nodes":[{"id":"ask","x":140,"y":10,"w":240,"h":50,"label":"用户：\"解释闭包\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"13"}},{"id":"term","x":140,"y":100,"w":240,"h":50,"label":"终端逐字出现，像打字一样","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"progress","x":140,"y":190,"w":240,"h":50,"label":"用户看到进度，知道正在处理","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"11"}}],"arrows":[{"from":"ask","to":"term","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"term","to":"progress","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}}]}'></div>
 
 					<h3>模式 2：Web 应用</h3>
-					<div class="diagram">浏览器                    服务器
-   │                         │
-   ├─── 发送提示词 ─────────→│
-   │                         │
-   │←── 数据块 1: "Closures"─┤
-   │    （立即显示）           │
-   │                         │
-   │←── 数据块 2: "are"──────┤
-   │    （追加显示）           │
-   │                         │
-   │←── 数据块 3: "functions"─┤
-   │    （继续追加...）        │</div>
+					<div class="diagram" data-diagram='{"width":660,"height":300,"title":"Web App Streaming","nodes":[{"id":"browser","x":30,"y":30,"w":140,"h":250,"label":"浏览器","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"14","fontWeight":"600"}},{"id":"server","x":490,"y":30,"w":140,"h":250,"label":"服务器","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"14","fontWeight":"600"}},{"id":"send","x":190,"y":45,"w":280,"h":36,"label":"发送提示词","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.2)","fontSize":"11"}},{"id":"c1","x":190,"y":105,"w":280,"h":36,"label":"数据块 1: \"Closures\" → 立即显示","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"c2","x":190,"y":165,"w":280,"h":36,"label":"数据块 2: \"are\" → 追加显示","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"c3","x":190,"y":225,"w":280,"h":36,"label":"数据块 3: \"functions\" → 继续追加","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}}],"arrows":[{"from":"browser","to":"send","direction":"right","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"server","to":"c1","direction":"left","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"server","to":"c2","direction":"left","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"server","to":"c3","direction":"left","style":{"color":"rgba(74,222,128,0.3)"}}]}'></div>
 
 					<h3>模式 3：多消费者</h3>
-					<div class="diagram">         onTextChunk(text)
-                │
-        ┌───────┼───────┐
-        ↓       ↓       ↓
-    控制台    WebSocket  日志文件
-    显示    → 客户端    → 存储</div>
+					<div class="diagram" data-diagram='{"width":560,"height":200,"title":"Multi-Consumer","nodes":[{"id":"src","x":180,"y":10,"w":200,"h":50,"label":"onTextChunk(text)","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12","mono":true}},{"id":"console","x":30,"y":130,"w":140,"h":50,"label":"控制台显示","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"ws","x":210,"y":130,"w":140,"h":50,"label":"WebSocket → 客户端","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"log","x":390,"y":130,"w":140,"h":50,"label":"日志文件 → 存储","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"11"}}],"arrows":[{"from":"src","to":"console","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"src","to":"ws","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"src","to":"log","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="performance">
 					<h2>性能特征</h2>
 					<h3>延迟与吞吐量</h3>
-					<div class="diagram">首个 Token 时间（TTFT）：
-├─ 小型模型（1.7B）：约 100ms
-├─ 中型模型（8B）：约 200ms
-└─ 大型模型（20B）：约 500ms
-
-每秒 Token 数：
-├─ 小型模型：50-80 tok/s
-├─ 中型模型：20-35 tok/s
-└─ 大型模型：10-15 tok/s
-
-用户体验：
-TTFT &lt; 500ms → 感觉即时
-Tok/s &gt; 20 → 阅读自然</div>
+					<div class="diagram" data-diagram='{"width":560,"height":310,"title":"Performance","nodes":[{"id":"ttft","x":30,"y":10,"w":500,"h":110,"label":"首个 Token 时间（TTFT）","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"small","x":55,"y":42,"w":140,"h":28,"label":"小型模型 ~100ms","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"10"}},{"id":"med","x":210,"y":42,"w":140,"h":28,"label":"中型模型 ~200ms","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.2)","fontSize":"10"}},{"id":"large","x":365,"y":42,"w":140,"h":28,"label":"大型模型 ~500ms","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)","fontSize":"10"}},{"id":"tps","x":30,"y":145,"w":500,"h":110,"label":"每秒 Token 数","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"ts","x":55,"y":177,"w":140,"h":28,"label":"小型 50-80 tok/s","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"10"}},{"id":"tm","x":210,"y":177,"w":140,"h":28,"label":"中型 20-35 tok/s","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.2)","fontSize":"10"}},{"id":"tl","x":365,"y":177,"w":140,"h":28,"label":"大型 10-15 tok/s","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)","fontSize":"10"}}],"labels":[{"x":30,"y":278,"text":"TTFT < 500ms → 感觉即时","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"},{"x":30,"y":298,"text":"Tok/s > 20 → 阅读自然","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"}]}'></div>
 				</div>
 
 				<div class="content-section" id="advanced">
@@ -190,36 +111,12 @@ Tok/s &gt; 20 → 阅读自然</div>
 					</ul>
 
 					<h3>上下文大小感知</h3>
-					<div class="diagram">┌────────────────────────────────┐
-│    上下文窗口 (4096)            │
-├────────────────────────────────┤
-│ 系统提示词          200 token  │
-│ 对话历史            1000       │
-│ 当前提示词          100        │
-│ 响应空间            2796       │
-└────────────────────────────────┘
-
-如果 maxTokens &gt; 2796：
-└─→ 错误或截断！</div>
+					<div class="diagram" data-diagram='{"width":520,"height":250,"title":"Context Size Awareness","nodes":[{"id":"win","x":30,"y":10,"w":460,"h":180,"label":"上下文窗口 (4096)","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"13","fontWeight":"600"}},{"id":"sys","x":55,"y":42,"w":410,"h":28,"label":"系统提示词        200 token","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.2)","fontSize":"11","mono":true}},{"id":"hist","x":55,"y":76,"w":410,"h":28,"label":"对话历史          1000","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"11","mono":true}},{"id":"cur","x":55,"y":110,"w":410,"h":28,"label":"当前提示词        100","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.08)","fontSize":"11","mono":true}},{"id":"resp","x":55,"y":144,"w":410,"h":28,"label":"响应空间          2796","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11","mono":true}}],"labels":[{"x":30,"y":218,"text":"如果 maxTokens > 2796 → 错误或截断！","color":"rgba(248,113,113,0.7)","anchor":"start","size":"12"}]}'></div>
 				</div>
 
 				<div class="content-section" id="agent-streaming">
 					<h2>智能体架构中的流式传输</h2>
-					<div class="diagram">简单智能体：
-用户 → LLM（流式） → 显示
-       └─ onTextChunk 显示进度
-
-多步骤智能体：
-步骤 1：规划（流式）→ 显示思考过程
-步骤 2：行动（流式）→ 显示操作
-步骤 3：结果（流式）→ 显示结果
-       └─ 用户看到智能体的全过程
-
-协作式智能体：
-智能体 A（流式）──┐
-                  ├─→ 协调器 → 用户
-智能体 B（流式）──┘
-       └─ 两者同时流式传输</div>
+					<div class="diagram" data-diagram='{"width":700,"height":360,"title":"Agent Streaming","nodes":[{"id":"s1","x":20,"y":10,"w":180,"h":36,"label":"简单智能体","style":{"stroke":"rgba(184,196,208,0.25)","fontSize":"12","fontWeight":"600"}},{"id":"s1a","x":20,"y":56,"w":100,"h":36,"label":"用户","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"11"}},{"id":"s1b","x":140,"y":56,"w":100,"h":36,"label":"LLM","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"s1c","x":260,"y":56,"w":100,"h":36,"label":"显示","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"11"}},{"id":"s2","x":20,"y":130,"w":180,"h":36,"label":"多步骤智能体","style":{"stroke":"rgba(184,196,208,0.25)","fontSize":"12","fontWeight":"600"}},{"id":"s2a","x":20,"y":176,"w":150,"h":36,"label":"步骤 1：规划（流式）","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)","fontSize":"10"}},{"id":"s2b","x":190,"y":176,"w":150,"h":36,"label":"步骤 2：行动（流式）","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)","fontSize":"10"}},{"id":"s2c","x":360,"y":176,"w":150,"h":36,"label":"步骤 3：结果（流式）","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","fontSize":"10"}},{"id":"s3","x":20,"y":250,"w":180,"h":36,"label":"协作式智能体","style":{"stroke":"rgba(184,196,208,0.25)","fontSize":"12","fontWeight":"600"}},{"id":"s3a","x":20,"y":296,"w":120,"h":36,"label":"智能体 A","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)","fontSize":"11"}},{"id":"s3b","x":20,"y":340,"w":120,"h":36,"label":"智能体 B","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)","fontSize":"11"}},{"id":"coord","x":200,"y":310,"w":120,"h":44,"label":"协调器","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"user","x":380,"y":310,"w":100,"h":44,"label":"用户","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"12"}}],"arrows":[{"from":"s1a","to":"s1b","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"s1b","to":"s1c","direction":"right","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"s2a","to":"s2b","direction":"right","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"s2b","to":"s2c","direction":"right","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"s3a","to":"coord","direction":"right","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"s3b","to":"coord","direction":"right","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"coord","to":"user","direction":"right","style":{"color":"rgba(74,222,128,0.3)"}}],"labels":[{"x":460,"y":65,"text":"onTextChunk 显示进度","color":"#6B6B74","anchor":"start","size":"10"},{"x":530,"y":185,"text":"用户看到全过程","color":"#6B6B74","anchor":"start","size":"10"},{"x":500,"y":330,"text":"两者同时流式传输","color":"#6B6B74","anchor":"start","size":"10"}]}'></div>
 				</div>
 
 				<div class="content-section" id="best-practices">

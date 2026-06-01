@@ -6,6 +6,7 @@
 	<title>08 - 带记忆的智能体：持久化状态 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="跨会话持久化信息，长期记忆管理，事实和偏好存储，记忆检索策略。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -45,61 +46,21 @@
 
 				<div class="content-section" id="memory-problem">
 					<h2>记忆问题</h2>
-					<div class="diagram">没有记忆                        有记忆
-──────────────                 ─────────────
-会话 1：                        会话 1：
-"I'm Alex"                     "I'm Alex" → 已保存
-"I love pizza"                 "I love pizza" → 已保存
-
-会话 2：                        会话 2：
-"What's my name?"              "What's my name?"
-"I don't know"                 "Alex!" ✓</div>
+					<div class="diagram" data-diagram='{"width":680,"height":340,"title":"Memory Problem","nodes":[{"id":"lh","x":20,"y":10,"w":300,"h":36,"label":"没有记忆","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"rh","x":360,"y":10,"w":300,"h":36,"label":"有记忆","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"l1h","x":20,"y":60,"w":300,"h":32,"label":"会话 1：","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.04)","fontSize":"11"}},{"id":"r1h","x":360,"y":60,"w":300,"h":32,"label":"会话 1：","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.04)","fontSize":"11"}},{"id":"l1a","x":20,"y":98,"w":300,"h":28,"label":"\"I'\''m Alex\"","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.04)","fontSize":"11","mono":true}},{"id":"r1a","x":360,"y":98,"w":300,"h":28,"label":"\"I'\''m Alex\" → 已保存","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.15)","fontSize":"11","mono":true}},{"id":"l1b","x":20,"y":132,"w":300,"h":28,"label":"\"I love pizza\"","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.04)","fontSize":"11","mono":true}},{"id":"r1b","x":360,"y":132,"w":300,"h":28,"label":"\"I love pizza\" → 已保存","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.15)","fontSize":"11","mono":true}},{"id":"l2h","x":20,"y":180,"w":300,"h":32,"label":"会话 2：","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.04)","fontSize":"11"}},{"id":"r2h","x":360,"y":180,"w":300,"h":32,"label":"会话 2：","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.04)","fontSize":"11"}},{"id":"l2q","x":20,"y":218,"w":300,"h":28,"label":"\"What'\''s my name?\"","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.04)","fontSize":"11","mono":true}},{"id":"r2q","x":360,"y":218,"w":300,"h":28,"label":"\"What'\''s my name?\"","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.04)","fontSize":"11","mono":true}},{"id":"l2a","x":20,"y":260,"w":300,"h":32,"label":"\"I don'\''t know\"","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)","fontSize":"12","mono":true}},{"id":"r2a","x":360,"y":260,"w":300,"h":32,"label":"\"Alex!\" ✓","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.25)","fontSize":"12","mono":true,"fontWeight":"600"}}],"labels":[{"x":170,"y":320,"text":"每次都是全新开始","color":"#6B6B74","size":"11","anchor":"middle"},{"x":510,"y":320,"text":"跨会话保持上下文","color":"rgba(74,222,128,0.7)","size":"11","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="architecture">
 					<h2>架构</h2>
-					<div class="diagram">┌─────────────────────────────────┐
-│         智能体会话               │
-├─────────────────────────────────┤
-│  系统提示词（System Prompt）      │
-│  + 已加载的记忆                  │
-│  + saveMemory 工具              │
-└────────┬────────────────────────┘
-         │
-         ↓
-┌─────────────────────────────────┐
-│      记忆管理器（Memory Manager） │
-├─────────────────────────────────┤
-│  • 从存储加载                    │
-│  • 保存到存储                    │
-│  • 格式化用于提示词              │
-└────────┬────────────────────────┘
-         │
-         ↓
-┌─────────────────────────────────┐
-│   持久化存储（Persistent Storage）│
-│   (agent-memory.json)           │
-└─────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":560,"height":380,"title":"Memory Architecture","nodes":[{"id":"session","x":60,"y":15,"w":440,"h":90,"label":"智能体会话","sublabel":"System Prompt + Loaded Memory + saveMemory Tool","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"14","fontWeight":"600"}},{"id":"manager","x":60,"y":155,"w":440,"h":100,"label":"记忆管理器（Memory Manager）","sublabel":"Load · Save · Format for Prompt","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"14","fontWeight":"600"}},{"id":"storage","x":60,"y":305,"w":440,"h":60,"label":"持久化存储（Persistent Storage）","sublabel":"agent-memory.json","style":{"stroke":"rgba(74,222,128,0.2)","fontSize":"14","fontWeight":"600"}}],"arrows":[{"from":"session","to":"manager","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"manager","to":"storage","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="how-it-works">
 					<h2>工作原理</h2>
 					<h3>1. 启动阶段</h3>
-					<div class="diagram">1. 加载 agent-memory.json
-2. 提取事实和偏好
-3. 添加到系统提示词
-4. 智能体"记住"了过去的信息</div>
+					<div class="diagram" data-diagram='{"width":520,"height":280,"title":"Startup Phase","nodes":[{"id":"s1","x":80,"y":15,"w":360,"h":40,"label":"1. 加载 agent-memory.json","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"s2","x":80,"y":80,"w":360,"h":40,"label":"2. 提取事实和偏好","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"s3","x":80,"y":145,"w":360,"h":40,"label":"3. 添加到系统提示词","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"s4","x":80,"y":210,"w":360,"h":40,"label":"4. 智能体\"记住\"了过去的信息","style":{"stroke":"rgba(74,222,128,0.25)","fontSize":"12"}}],"arrows":[{"from":"s1","to":"s2","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"s2","to":"s3","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"s3","to":"s4","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}]}'></div>
 
 					<h3>2. 对话过程中</h3>
-					<div class="diagram">用户分享信息
-       ↓
-智能体识别重要事实
-       ↓
-智能体调用 saveMemory()
-       ↓
-保存到 JSON 文件
-       ↓
-在未来的会话中可用</div>
+					<div class="diagram" data-diagram='{"width":520,"height":380,"title":"During Conversation","nodes":[{"id":"f1","x":100,"y":15,"w":320,"h":40,"label":"用户分享信息","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"f2","x":100,"y":85,"w":320,"h":40,"label":"智能体识别重要事实","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"f3","x":100,"y":155,"w":320,"h":40,"label":"智能体调用 saveMemory()","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"12","mono":true}},{"id":"f4","x":100,"y":225,"w":320,"h":40,"label":"保存到 JSON 文件","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"f5","x":100,"y":295,"w":320,"h":40,"label":"在未来的会话中可用","style":{"stroke":"rgba(74,222,128,0.25)","fontSize":"12"}}],"arrows":[{"from":"f1","to":"f2","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"f2","to":"f3","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"f3","to":"f4","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"f4","to":"f5","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}]}'></div>
 
 					<h3>3. 记忆类型</h3>
 					<p><strong>事实（Facts）</strong>：一般信息</p>
@@ -131,24 +92,10 @@
 				<div class="content-section" id="integration-patterns">
 					<h2>记忆集成模式</h2>
 					<h3>系统提示词增强</h3>
-					<div class="diagram">基础提示词：
-"You are a helpful assistant."
-
-增强后的带记忆提示词：
-"You are a helpful assistant with long-term memory.
-
-=== LONG-TERM MEMORY ===
-Known Facts:
-- User's name is Alex
-- User loves pizza"</div>
+					<div class="diagram" data-diagram='{"width":600,"height":340,"title":"System Prompt Enhancement","nodes":[{"id":"base","x":60,"y":15,"w":480,"h":60,"label":"基础提示词","sublabel":"\"You are a helpful assistant.\"","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"12"}},{"id":"enhanced","x":60,"y":130,"w":480,"h":180,"label":"增强后的带记忆提示词","sublabel":"\"...with long-term memory.\"","style":{"stroke":"rgba(74,222,128,0.2)","fontSize":"13","fontWeight":"600"}}],"labels":[{"x":300,"y":100,"text":"↓ 添加记忆上下文","color":"rgba(184,196,208,0.5)","size":"11"},{"x":100,"y":175,"text":"Known Facts:","color":"#A0A0A8","size":"11","anchor":"start"},{"x":100,"y":195,"text":"- User'\''s name is Alex","color":"#F0F0F2","size":"11","anchor":"start","mono":true},{"x":100,"y":215,"text":"- User loves pizza","color":"#F0F0F2","size":"11","anchor":"start","mono":true}]}'></div>
 
 					<h3>工具辅助保存</h3>
-					<div class="diagram">智能体决定何时保存：
-用户："My favorite color is blue"
-      ↓
-智能体："我应该记住这个"
-      ↓
-调用：saveMemory(type="preference", key="color", content="blue")</div>
+					<div class="diagram" data-diagram='{"width":600,"height":260,"title":"Tool-Assisted Save","nodes":[{"id":"u1","x":60,"y":15,"w":480,"h":40,"label":"用户：\"My favorite color is blue\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12","mono":true}},{"id":"a1","x":60,"y":85,"w":480,"h":40,"label":"智能体：\"我应该记住这个\"","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"12"}},{"id":"call","x":60,"y":160,"w":480,"h":55,"label":"调用：saveMemory()","sublabel":"type=\"preference\", key=\"color\", content=\"blue\"","style":{"stroke":"rgba(74,222,128,0.25)","fontSize":"12","mono":true}}],"arrows":[{"from":"u1","to":"a1","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"a1","to":"call","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="memory-strategies">
@@ -188,11 +135,7 @@ Known Facts:
 
 				<div class="content-section" id="evolution">
 					<h2>演进路径</h2>
-					<div class="diagram">1. 无状态 → 每次交互相互独立
-2. 会话记忆 → 在对话中记住信息
-3. 持久化记忆 → 跨会话记住信息
-4. 分布式记忆 → 跨实例共享
-5. 语义搜索 → 查找相关记忆</div>
+					<div class="diagram" data-diagram='{"width":520,"height":360,"title":"Evolution Path","nodes":[{"id":"e1","x":80,"y":15,"w":360,"h":40,"label":"1. 无状态 → 每次交互相互独立","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"12"}},{"id":"e2","x":80,"y":80,"w":360,"h":40,"label":"2. 会话记忆 → 在对话中记住信息","style":{"stroke":"rgba(96,165,250,0.2)","fontSize":"12"}},{"id":"e3","x":80,"y":145,"w":360,"h":40,"label":"3. 持久化记忆 → 跨会话记住信息","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"e4","x":80,"y":210,"w":360,"h":40,"label":"4. 分布式记忆 → 跨实例共享","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"e5","x":80,"y":275,"w":360,"h":40,"label":"5. 语义搜索 → 查找相关记忆","style":{"stroke":"rgba(74,222,128,0.25)","fontSize":"12"}}],"arrows":[{"from":"e1","to":"e2","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"e2","to":"e3","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"e3","to":"e4","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"e4","to":"e5","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="comparison">

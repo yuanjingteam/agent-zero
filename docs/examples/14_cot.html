@@ -6,6 +6,7 @@
 	<title>14 - 思维链：可审计的分步决策 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="结构化多阶段推理，防止早期偏见，生成可审计的最终决策。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -45,17 +46,7 @@
 
 				<div class="content-section" id="visualization">
 					<h2>可视化链</h2>
-					<div class="diagram">[Return request: "Defect claim on headphones"]
-         |
-[Phase 1: Facts only]
-         |
-[Phase 2: Red flags]
-         |
-[Phase 3: Legitimacy]
-         |
-[Phase 4: Policy check]
-         |
-[Phase 5: Final decision]</div>
+					<div class="diagram" data-diagram='{"width":440,"height":460,"title":"Chain of Thought","nodes":[{"id":"req","x":40,"y":20,"w":360,"h":45,"label":"Return request","sublabel":"\"Defect claim on headphones\"","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"p1","x":40,"y":95,"w":360,"h":45,"label":"Phase 1: Facts only","sublabel":"Extract data, no early judgment","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"p2","x":40,"y":170,"w":360,"h":45,"label":"Phase 2: Red flags","sublabel":"Explicit fraud screening checklist","style":{"stroke":"rgba(248,113,113,0.25)"}},{"id":"p3","x":40,"y":245,"w":360,"h":45,"label":"Phase 3: Legitimacy","sublabel":"Build customer-side case as counterweight","style":{"stroke":"rgba(74,222,128,0.25)"}},{"id":"p4","x":40,"y":320,"w":360,"h":45,"label":"Phase 4: Policy check","sublabel":"Apply rules before deciding","style":{"stroke":"rgba(251,191,36,0.25)"}},{"id":"p5","x":40,"y":395,"w":360,"h":45,"label":"Phase 5: Final decision","sublabel":"Decide only after all prior phases complete","style":{"stroke":"rgba(184,196,208,0.25)"}}],"arrows":[{"from":"req","to":"p1","direction":"down"},{"from":"p1","to":"p2","direction":"down"},{"from":"p2","to":"p3","direction":"down"},{"from":"p3","to":"p4","direction":"down"},{"from":"p4","to":"p5","direction":"down"}]}'></div>
 				</div>
 
 				<div class="content-section" id="what-it-shows">

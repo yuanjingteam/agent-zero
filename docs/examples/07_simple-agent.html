@@ -6,6 +6,7 @@
 	<title>07 - 简单智能体：函数调用 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="定义 LLM 可以使用的工具，实现函数调用，将文本生成转变为智能体。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -45,23 +46,13 @@
 
 				<div class="content-section" id="what-makes-agent">
 					<h2>什么构成了智能体？</h2>
-					<div class="diagram">文本生成器                  智能体
-──────────────             ──────
-LLM → 仅输出文本           LLM + 工具 → 可以行动</div>
+					<div class="diagram" data-diagram='{"width":600,"height":200,"title":"","nodes":[{"id":"gen","x":30,"y":50,"w":220,"h":120,"label":"文本生成器","sublabel":"LLM → 仅输出文本","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.10)","textColor":"#F0F0F2","fontWeight":"bold","subColor":"#A0A0A8"}},{"id":"agent","x":350,"y":50,"w":220,"h":120,"label":"智能体","sublabel":"LLM + 工具 → 可以行动","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.3)","textColor":"#F0F0F2","fontWeight":"bold","subColor":"#A0A0A8","strokeWidth":2}}],"arrows":[{"from":"gen","to":"agent","direction":"right","label":"","style":{"stroke":"rgba(184,196,208,0.25)","strokeWidth":2}}],"labels":[]}'></div>
 					<p><strong>函数调用</strong>允许大语言模型调用预定义的函数，以访问数据或执行其自身无法完成的操作。</p>
 				</div>
 
 				<div class="content-section" id="core-idea">
 					<h2>核心思想</h2>
-					<div class="diagram">用户："现在几点了？"
-       ↓
-大语言模型思考："我需要获取当前时间"
-       ↓
-大语言模型调用：getCurrentTime()
-       ↓
-工具返回："1:46:36 PM"
-       ↓
-大语言模型回复："现在是 13:46"</div>
+					<div class="diagram" data-diagram='{"width":600,"height":420,"title":"","nodes":[{"id":"user","x":200,"y":20,"w":200,"h":50,"label":"用户：现在几点了？","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.10)","textColor":"#F0F0F2","fontSize":"12"}},{"id":"think","x":200,"y":100,"w":200,"h":50,"label":"LLM 思考：我需要获取当前时间","style":{"fill":"rgba(251,191,36,0.3)","stroke":"rgba(251,191,36,0.5)","textColor":"#F0F0F2","fontSize":"11"}},{"id":"call","x":200,"y":180,"w":200,"h":50,"label":"LLM 调用：getCurrentTime()","style":{"fill":"rgba(96,165,250,0.3)","stroke":"rgba(96,165,250,0.5)","textColor":"#F0F0F2","fontSize":"11","mono":true}},{"id":"result","x":200,"y":260,"w":200,"h":50,"label":"工具返回：1:46:36 PM","style":{"fill":"rgba(74,222,128,0.3)","stroke":"rgba(74,222,128,0.5)","textColor":"#F0F0F2","fontSize":"11","mono":true}},{"id":"reply","x":200,"y":340,"w":200,"h":50,"label":"LLM 回复：现在是 13:46","style":{"fill":"#111114","stroke":"rgba(255,255,255,0.10)","textColor":"#F0F0F2","fontSize":"12"}}],"arrows":[{"from":"user","to":"think","direction":"down","style":{"stroke":"rgba(184,196,208,0.25)"}},{"from":"think","to":"call","direction":"down","style":{"stroke":"rgba(184,196,208,0.25)"}},{"from":"call","to":"result","direction":"down","style":{"stroke":"rgba(184,196,208,0.25)"}},{"from":"result","to":"reply","direction":"down","style":{"stroke":"rgba(184,196,208,0.25)"}}],"labels":[]}'></div>
 					<p>这就是智能体能力 - 能够"做"，而不仅仅是"说"。</p>
 				</div>
 

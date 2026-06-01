@@ -6,6 +6,7 @@
 	<title>12 - 思维树：搜索推理分支 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="束搜索遍历多个候选路径，评分剪枝，可视化搜索过程。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -45,18 +46,7 @@
 
 				<div class="content-section" id="visualization">
 					<h2>可视化树</h2>
-					<div class="diagram">[Behavior: "Person leaves secure job without a clear plan"]
-         |
-    [Phase 1: Branch - 4 hypotheses]
-    /        |         |        \
-[Avoidance][Burnout][Growth][External pressure]
-    |         |          |            |
-[Phase 2: Score]
-   6         9          7            4
-             |
-      [Phase 3: Prune - losers removed]
-             |
- [Phase 4: Conclusion from ONLY Burnout]</div>
+					<div class="diagram" data-diagram='{"width":700,"height":460,"title":"Tree of Thought","nodes":[{"id":"root","x":180,"y":15,"w":340,"h":50,"label":"Behavior: \"Person leaves secure job without a clear plan\"","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"11"}},{"id":"branch","x":240,"y":95,"w":220,"h":40,"label":"Phase 1: Branch - 4 hypotheses","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"avoid","x":30,"y":170,"w":140,"h":50,"label":"Avoidance","sublabel":"Score: 6","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)"}},{"id":"burn","x":190,"y":170,"w":140,"h":50,"label":"Burnout","sublabel":"Score: 9","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"grow","x":370,"y":170,"w":140,"h":50,"label":"Growth","sublabel":"Score: 7","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.15)"}},{"id":"press","x":530,"y":170,"w":140,"h":50,"label":"External pressure","sublabel":"Score: 4","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)"}},{"id":"score","x":260,"y":260,"w":180,"h":40,"label":"Phase 2: Score","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"prune","x":260,"y":330,"w":180,"h":40,"label":"Phase 3: Prune","sublabel":"losers removed","style":{"stroke":"rgba(248,113,113,0.25)"}},{"id":"conclude","x":200,"y":400,"w":300,"h":40,"label":"Phase 4: Conclusion from ONLY Burnout","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"root","to":"branch","direction":"down"},{"from":"branch","to":"avoid","direction":"down"},{"from":"branch","to":"burn","direction":"down"},{"from":"branch","to":"grow","direction":"down"},{"from":"branch","to":"press","direction":"down"},{"from":"burn","to":"score","direction":"down"},{"from":"score","to":"prune","direction":"down"},{"from":"prune","to":"conclude","direction":"down"}],"labels":[{"x":350,"y":250,"text":"6   9   7   4","color":"#A0A0A8","size":"11"}]}'></div>
 				</div>
 
 				<div class="content-section" id="what-it-shows">

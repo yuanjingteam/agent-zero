@@ -6,6 +6,7 @@
 	<title>05 - 批处理：并行处理 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="并发处理多个请求，使用上下文序列和 GPU 批处理优化吞吐量。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -46,79 +47,33 @@
 				<div class="content-section" id="performance-problem">
 					<h2>性能问题</h2>
 					<h3>顺序处理（慢）</h3>
-					<div class="diagram">请求 1 ────────→ 回复 1（2 秒）
-                        ↓
-                    请求 2 ────────→ 回复 2（2 秒）
-                                        ↓
-                                    总计：4 秒</div>
+					<div class="diagram" data-diagram='{"width":660,"height":380,"title":"Sequential Processing (Slow)","nodes":[{"id":"req1","x":60,"y":20,"w":160,"h":44,"label":"请求 1","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"resp1","x":420,"y":20,"w":180,"h":44,"label":"回复 1（2 秒）","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"req2","x":60,"y":130,"w":160,"h":44,"label":"请求 2","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"resp2","x":420,"y":130,"w":180,"h":44,"label":"回复 2（2 秒）","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"total","x":240,"y":260,"w":180,"h":44,"label":"总计：4 秒","style":{"stroke":"rgba(248,113,113,0.6)","fontWeight":"600"}}],"arrows":[{"from":"req1","to":"resp1","direction":"right"},{"from":"resp1","to":"req2","direction":"down","label":"等待完成"},{"from":"req2","to":"resp2","direction":"right"},{"from":"resp1","to":"total","direction":"down"},{"from":"resp2","to":"total","direction":"down"}],"labels":[{"x":330,"y":80,"text":"——— 顺序执行 ———","color":"#A0A0A8","size":"11","anchor":"middle"}]}'></div>
 
 					<h3>并行处理（快）</h3>
-					<div class="diagram">请求 1 ────────→ 回复 1（2 秒）──┐
-                                   ├→ 总计：2 秒
-请求 2 ────────→ 回复 2（2 秒）──┘
-     （两个请求同时运行）</div>
+					<div class="diagram" data-diagram='{"width":660,"height":320,"title":"Parallel Processing (Fast)","nodes":[{"id":"req1","x":40,"y":20,"w":160,"h":44,"label":"请求 1","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"resp1","x":300,"y":20,"w":180,"h":44,"label":"回复 1（2 秒）","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"req2","x":40,"y":130,"w":160,"h":44,"label":"请求 2","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"resp2","x":300,"y":130,"w":180,"h":44,"label":"回复 2（2 秒）","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"total","x":540,"y":70,"w":100,"h":100,"label":"总计\n2 秒","style":{"stroke":"rgba(74,222,128,0.6)","fontWeight":"700","fontSize":"15"}}],"arrows":[{"from":"req1","to":"resp1","direction":"right"},{"from":"req2","to":"resp2","direction":"right"},{"from":"resp1","to":"total","direction":"right"},{"from":"resp2","to":"total","direction":"right"}],"labels":[{"x":190,"y":80,"text":"并行同时运行","color":"rgba(74,222,128,0.7)","size":"11","anchor":"middle"}]}'></div>
 					<p><strong>性能提升：2 倍加速！</strong></p>
 				</div>
 
 				<div class="content-section" id="context-sequences">
 					<h2>核心概念：上下文序列</h2>
 					<h3>单序列 vs. 多序列</h3>
-					<div class="diagram">┌────────────────────────────────────────────────┐
-│              模型（只加载一次）                   │
-├────────────────────────────────────────────────┤
-│                   上下文                        │
-│  ┌──────────────┐          ┌──────────────┐   │
-│  │   序列 1     │          │   序列 2     │   │
-│  │              │          │              │   │
-│  │   对话历史 A  │          │   对话历史 B  │   │
-│  └──────────────┘          └──────────────┘   │
-└────────────────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":560,"height":240,"title":"Single vs Multi Sequence","nodes":[{"id":"model","x":30,"y":10,"w":500,"h":40,"label":"模型（只加载一次）","style":{"stroke":"rgba(184,196,208,0.25)","fontWeight":"600"}},{"id":"ctx","x":30,"y":60,"w":500,"h":160,"label":"上下文","style":{"stroke":"rgba(184,196,208,0.12)"}},{"id":"seq1","x":60,"y":100,"w":200,"h":100,"label":"序列 1\n\n对话历史 A","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"seq2","x":300,"y":100,"w":200,"h":100,"label":"序列 2\n\n对话历史 B","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}}]}'></div>
 					<p><strong>关键洞察：</strong>模型权重是共享的（内存高效），每个序列拥有独立的历史记录，序列可以并行处理。</p>
 				</div>
 
 				<div class="content-section" id="promise-all">
 					<h2>并行处理的工作原理</h2>
 					<h3>Promise.all 模式</h3>
-					<div class="diagram">顺序执行：
-────────────────────────────────────
-await fn1();  // 等待 2 秒
-await fn2();  // 再等 2 秒
-总计：4 秒
-
-并行执行：
-────────────────────────────────────
-await Promise.all([
-    fn1(),    // 立即开始
-    fn2()     // 立即开始（不等待！）
-]);
-总计：2 秒（取决于最慢的那个）</div>
+					<div class="diagram" data-diagram='{"width":660,"height":340,"title":"Promise.all Pattern","nodes":[{"id":"seq_title","x":30,"y":10,"w":180,"h":36,"label":"顺序执行","style":{"stroke":"rgba(248,113,113,0.3)","fontWeight":"600"}},{"id":"s_fn1","x":50,"y":58,"w":220,"h":32,"label":"await fn1();  // 等待 2 秒","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"s_fn2","x":50,"y":102,"w":220,"h":32,"label":"await fn2();  // 再等 2 秒","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"s_total","x":50,"y":150,"w":220,"h":32,"label":"总计：4 秒","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.3)","mono":true,"fontSize":"11"}},{"id":"par_title","x":360,"y":10,"w":180,"h":36,"label":"并行执行","style":{"stroke":"rgba(74,222,128,0.3)","fontWeight":"600"}},{"id":"p_all","x":340,"y":58,"w":290,"h":32,"label":"await Promise.all([","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"p_fn1","x":360,"y":102,"w":250,"h":32,"label":"fn1(),    // 立即开始","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"p_fn2","x":360,"y":146,"w":250,"h":32,"label":"fn2()     // 立即开始","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"p_close","x":340,"y":190,"w":290,"h":32,"label":"]);","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"p_total","x":340,"y":238,"w":290,"h":32,"label":"总计：2 秒（取决于最慢的）","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","mono":true,"fontSize":"11"}}],"arrows":[{"from":"s_fn1","to":"s_fn2","direction":"down"},{"from":"s_fn2","to":"s_total","direction":"down"}],"labels":[{"x":160,"y":328,"text":"——— 等待 4 秒 ———","color":"#A0A0A8","size":"10","anchor":"middle"},{"x":490,"y":328,"text":"——— 只等 2 秒 ———","color":"rgba(74,222,128,0.6)","size":"10","anchor":"middle"}]}'></div>
 
 					<h3>执行时间线</h3>
-					<div class="diagram">时间 →  0 秒     1 秒     2 秒     3 秒     4 秒
-        │       │       │       │       │
-序列 1：├───────处理中───────┤
-        │                        └─ 回复 1
-        │
-序列 2：├───────处理中───────┤
-                                 └─ 回复 2
-
-        两者都在约 2 秒完成，而不是 4 秒！</div>
+					<div class="diagram" data-diagram='{"width":660,"height":260,"title":"Execution Timeline","nodes":[{"id":"seq1_label","x":10,"y":30,"w":70,"h":36,"label":"序列 1","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"11"}},{"id":"bar1","x":100,"y":30,"w":340,"h":36,"label":"处理中（~2 秒）","style":{"stroke":"rgba(96,165,250,0.3)","fill":"#18181C"}},{"id":"reply1","x":460,"y":30,"w":80,"h":36,"label":"回复 1","style":{"stroke":"rgba(74,222,128,0.3)","fill":"#18181C"}},{"id":"seq2_label","x":10,"y":110,"w":70,"h":36,"label":"序列 2","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"11"}},{"id":"bar2","x":100,"y":110,"w":340,"h":36,"label":"处理中（~2 秒）","style":{"stroke":"rgba(96,165,250,0.3)","fill":"#18181C"}},{"id":"reply2","x":460,"y":110,"w":80,"h":36,"label":"回复 2","style":{"stroke":"rgba(74,222,128,0.3)","fill":"#18181C"}}],"arrows":[{"from":"bar1","to":"reply1","direction":"right"},{"from":"bar2","to":"reply2","direction":"right"}],"labels":[{"x":100,"y":200,"text":"0 秒","color":"#6B6B74","size":"10","anchor":"middle"},{"x":220,"y":200,"text":"1 秒","color":"#6B6B74","size":"10","anchor":"middle"},{"x":340,"y":200,"text":"2 秒","color":"#6B6B74","size":"10","anchor":"middle"},{"x":460,"y":200,"text":"3 秒","color":"#6B6B74","size":"10","anchor":"middle"},{"x":580,"y":200,"text":"4 秒","color":"#6B6B74","size":"10","anchor":"middle"},{"x":340,"y":235,"text":"两者都在约 2 秒完成，而不是 4 秒！","color":"rgba(74,222,128,0.7)","size":"12","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="gpu-batching">
 					<h2>GPU 批处理</h2>
 					<h3>为什么批处理很重要</h3>
-					<div class="diagram">无批处理（低效）
-──────────────────────────────
-GPU：[Token 1] ... 等待 ...
-GPU：[Token 2] ... 等待 ...
-GPU：[Token 3] ... 等待 ...
-     └─ GPU 利用率不足
-
-有批处理（高效）
-─────────────────────────
-GPU：[Tokens 1-1024]  ← 完整批次
-     └─ GPU 充分利用！</div>
+					<div class="diagram" data-diagram='{"width":560,"height":340,"title":"GPU Batching","nodes":[{"id":"no_title","x":30,"y":10,"w":230,"h":32,"label":"无批处理（低效）","style":{"stroke":"rgba(248,113,113,0.3)","fontWeight":"600"}},{"id":"no1","x":40,"y":56,"w":210,"h":36,"label":"GPU: [Token 1] ... 等待","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"10"}},{"id":"no2","x":40,"y":100,"w":210,"h":36,"label":"GPU: [Token 2] ... 等待","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"10"}},{"id":"no3","x":40,"y":144,"w":210,"h":36,"label":"GPU: [Token 3] ... 等待","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"10"}},{"id":"no_waste","x":40,"y":194,"w":210,"h":28,"label":"GPU 利用率不足","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.3)","mono":true,"fontSize":"10"}},{"id":"yes_title","x":300,"y":10,"w":230,"h":32,"label":"有批处理（高效）","style":{"stroke":"rgba(74,222,128,0.3)","fontWeight":"600"}},{"id":"yes1","x":310,"y":56,"w":210,"h":70,"label":"GPU: [Tokens 1-1024]\n← 完整批次","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","mono":true,"fontSize":"10"}},{"id":"yes_good","x":310,"y":194,"w":210,"h":28,"label":"GPU 充分利用！","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","mono":true,"fontSize":"10"}}],"labels":[{"x":280,"y":310,"text":"对比：逐个处理 vs 批量处理","color":"#6B6B74","size":"11","anchor":"middle"}]}'></div>
 
 					<h3>权衡取舍</h3>
 					<table>
@@ -139,57 +94,16 @@ GPU：[Tokens 1-1024]  ← 完整批次
 					<h2>架构模式</h2>
 
 					<h3>模式 1：多用户服务</h3>
-					<div class="diagram">┌─────────┐  ┌─────────┐  ┌─────────┐
-│ 用户 A  │  │ 用户 B  │  │ 用户 C  │
-└────┬────┘  └────┬────┘  └────┬────┘
-     └────────────┼────────────┘
-                  ↓
-         ┌────────────────┐
-         │   负载均衡器     │
-         └────────────────┘
-                  ↓
-     ┌────────────┼────────────┐
-     ↓            ↓            ↓
-┌─────────┐  ┌─────────┐  ┌─────────┐
-│  序列 1  │  │  序列 2  │  │  序列 3  │
-└─────────┘  └─────────┘  └─────────┘
-     └────────────┼────────────┘
-                  ↓
-         ┌────────────────┐
-         │   共享模型       │
-         └────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":560,"height":480,"title":"Pattern 1: Multi-User Service","nodes":[{"id":"ua","x":60,"y":10,"w":100,"h":40,"label":"用户 A","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"ub","x":230,"y":10,"w":100,"h":40,"label":"用户 B","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"uc","x":400,"y":10,"w":100,"h":40,"label":"用户 C","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"lb","x":160,"y":100,"w":240,"h":44,"label":"负载均衡器","style":{"stroke":"rgba(251,191,36,0.3)","fontWeight":"600"}},{"id":"s1","x":30,"y":210,"w":130,"h":44,"label":"序列 1","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"s2","x":215,"y":210,"w":130,"h":44,"label":"序列 2","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"s3","x":400,"y":210,"w":130,"h":44,"label":"序列 3","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"model","x":160,"y":320,"w":240,"h":44,"label":"共享模型","style":{"stroke":"rgba(74,222,128,0.3)","fontWeight":"600"}}],"arrows":[{"from":"ua","to":"lb","direction":"down"},{"from":"ub","to":"lb","direction":"down"},{"from":"uc","to":"lb","direction":"down"},{"from":"lb","to":"s1","direction":"down"},{"from":"lb","to":"s2","direction":"down"},{"from":"lb","to":"s3","direction":"down"},{"from":"s1","to":"model","direction":"down"},{"from":"s2","to":"model","direction":"down"},{"from":"s3","to":"model","direction":"down"}]}'></div>
 
 					<h3>模式 2：多代理系统</h3>
-					<div class="diagram">         ┌──────────────┐
-         │     任务      │
-         └──────┬───────┘
-                │
-       ┌────────┼────────┐
-       ↓        ↓        ↓
-  ┌────────┐ ┌──────┐ ┌──────────┐
-  │规划代理 │ │评审代理│ │ 执行代理  │
-  └───┬────┘ └──┬───┘ └────┬─────┘
-      └─────────┼──────────┘
-                ↓
-       （全部并行运行）</div>
+					<div class="diagram" data-diagram='{"width":560,"height":320,"title":"Pattern 2: Multi-Agent System","nodes":[{"id":"task","x":200,"y":10,"w":160,"h":44,"label":"任务","style":{"stroke":"rgba(251,191,36,0.3)","fontWeight":"600"}},{"id":"plan","x":30,"y":120,"w":140,"h":44,"label":"规划代理","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"review","x":210,"y":120,"w":140,"h":44,"label":"评审代理","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"exec","x":390,"y":120,"w":140,"h":44,"label":"执行代理","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"result","x":160,"y":240,"w":240,"h":40,"label":"全部并行运行","style":{"stroke":"rgba(74,222,128,0.3)","fontWeight":"600"}}],"arrows":[{"from":"task","to":"plan","direction":"down"},{"from":"task","to":"review","direction":"down"},{"from":"task","to":"exec","direction":"down"},{"from":"plan","to":"result","direction":"down"},{"from":"review","to":"result","direction":"down"},{"from":"exec","to":"result","direction":"down"}]}'></div>
 				</div>
 
 				<div class="content-section" id="resource-management">
 					<h2>资源管理</h2>
 					<h3>内存分配</h3>
-					<div class="diagram">┌──────────────────────────────────┐
-│        总显存：8GB                │
-├──────────────────────────────────┤
-│  模型权重：           4.0 GB     │
-│  上下文基础：         1.0 GB     │
-│  序列 1（KV 缓存）：   0.8 GB     │
-│  序列 2（KV 缓存）：   0.8 GB     │
-│  序列 3（KV 缓存）：   0.8 GB     │
-│  开销：               0.6 GB     │
-├──────────────────────────────────┤
-│  总使用量：           8.0 GB     │
-│  剩余：               0.0 GB     │
-└──────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":520,"height":440,"title":"Memory Allocation (8GB VRAM)","nodes":[{"id":"total_box","x":30,"y":10,"w":460,"h":400,"label":"总显存：8GB","style":{"stroke":"rgba(184,196,208,0.25)","fontWeight":"600","fontSize":"14"}},{"id":"m1","x":55,"y":60,"w":410,"h":36,"label":"模型权重：4.0 GB","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.3)","mono":true,"fontSize":"11"}},{"id":"m2","x":55,"y":110,"w":410,"h":36,"label":"上下文基础：1.0 GB","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)","mono":true,"fontSize":"11"}},{"id":"m3","x":55,"y":160,"w":410,"h":36,"label":"序列 1（KV 缓存）：0.8 GB","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)","mono":true,"fontSize":"11"}},{"id":"m4","x":55,"y":210,"w":410,"h":36,"label":"序列 2（KV 缓存）：0.8 GB","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)","mono":true,"fontSize":"11"}},{"id":"m5","x":55,"y":260,"w":410,"h":36,"label":"序列 3（KV 缓存）：0.8 GB","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)","mono":true,"fontSize":"11"}},{"id":"m6","x":55,"y":310,"w":410,"h":36,"label":"开销：0.6 GB","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.06)","mono":true,"fontSize":"11"}},{"id":"used","x":55,"y":365,"w":410,"h":32,"label":"总使用量：8.0 GB | 剩余：0.0 GB","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.3)","mono":true,"fontSize":"11","fontWeight":"600"}}]}'></div>
 
 					<div class="formula-box">
 						<span class="label">内存公式</span>

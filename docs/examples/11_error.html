@@ -6,6 +6,7 @@
 	<title>11 - 错误处理：弹性与降级 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="类型化错误分类，超时与重试策略，优雅降级，关联 ID 和可观测性。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -89,15 +90,7 @@
 					<p><strong>先标准化，再分类。</strong> <code>normalizeUnknownError</code> 将任意抛出的值转换为 <code>AppError</code>。<code>classifyError</code> 添加 <code>retryable</code> 和 <code>type</code>。</p>
 
 					<h3>典型的阶梯式恢复策略</h3>
-					<div class="diagram">超时 → 限制任何步骤的停滞时间
-  ↓
-重试 → 仅当 classifyError 判定为 retryable 时（带退避和抖动）
-  ↓
-备用方案 → 如果主工具以瞬态方式失败，运行更安全的替代方案
-  ↓
-降级模式 → 确定性地提取 ID 并使用主工具 > 备用工具模型
-  ↓
-优雅失败 → 如果无法恢复，返回 formatUserFacingError 加上关联 ID</div>
+					<div class="diagram" data-diagram='{"width":580,"height":440,"title":"Recovery Cascade","nodes":[{"id":"step1","x":60,"y":20,"w":460,"h":55,"label":"超时","sublabel":"限制任何步骤的停滞时间","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"step2","x":60,"y":105,"w":460,"h":55,"label":"重试","sublabel":"仅当 classifyError 判定为 retryable 时（带退避和抖动）","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"step3","x":60,"y":190,"w":460,"h":55,"label":"备用方案","sublabel":"如果主工具以瞬态方式失败，运行更安全的替代方案","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"step4","x":60,"y":275,"w":460,"h":55,"label":"降级模式","sublabel":"确定性地提取 ID 并使用主工具 > 备用工具模型","style":{"stroke":"rgba(251,191,36,0.25)"}},{"id":"step5","x":60,"y":360,"w":460,"h":55,"label":"优雅失败","sublabel":"如果无法恢复，返回 formatUserFacingError 加上关联 ID","style":{"stroke":"rgba(248,113,113,0.3)"}}],"arrows":[{"from":"step1","to":"step2","direction":"down"},{"from":"step2","to":"step3","direction":"down"},{"from":"step3","to":"step4","direction":"down"},{"from":"step4","to":"step5","direction":"down"}]}'></div>
 				</div>
 
 				<div class="content-section" id="user-vs-debug">

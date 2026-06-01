@@ -6,6 +6,7 @@
 	<title>13 - 思维图：DAG 多源合并 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="将推理建模为有向无环图，并行源提取、冲突解决和合并规则。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -45,24 +46,7 @@
 
 				<div class="content-section" id="visualization">
 					<h2>可视化图结构</h2>
-					<div class="diagram">                    [root: behavior]
-                   /    |      |    \
-             [n2]    [n3]   [n4]   [n5]      ← 4 hypotheses (branch)
-          Avoidance Burnout Growth Pressure
-             Sc:6     Sc:9    Sc:7   Sc:4
-                \      / \            |
-                 \    /   \           |
-              [n6:Contrast]  [n7:Contrast]    ← Burnout vs Avoidance / Burnout vs Pressure
-              (n3 vs n2)     (n3 vs n5)
-                  |    \         |
-                  |   [n8:Refined]  [n9:Refined]  ← weak hypothesis rescued and improved
-                  |    (n5+n3)      (n4+n6)
-                  |        \       /
-              [n10:Synthesis1]  [n11:Synthesis2] ← partial syntheses
-              (n3,n2,n6)        (n8,n9,n7)
-                    \              /
-                   [n12:CONCLUSION]            <- all strands merged
-                  (n10,n11,n6,n7,n8)</div>
+					<div class="diagram" data-diagram='{"width":700,"height":500,"title":"Graph of Thought","nodes":[{"id":"root","x":230,"y":15,"w":240,"h":45,"label":"root: behavior","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"n2","x":30,"y":100,"w":140,"h":50,"label":"Avoidance","sublabel":"Sc: 6","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)"}},{"id":"n3","x":190,"y":100,"w":140,"h":50,"label":"Burnout","sublabel":"Sc: 9","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"n4","x":370,"y":100,"w":140,"h":50,"label":"Growth","sublabel":"Sc: 7","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.15)"}},{"id":"n5","x":530,"y":100,"w":140,"h":50,"label":"Pressure","sublabel":"Sc: 4","style":{"fill":"#18181C","stroke":"rgba(248,113,113,0.2)"}},{"id":"n6","x":100,"y":210,"w":200,"h":45,"label":"Contrast","sublabel":"Burnout vs Avoidance","style":{"stroke":"rgba(251,191,36,0.25)"}},{"id":"n7","x":400,"y":210,"w":200,"h":45,"label":"Contrast","sublabel":"Burnout vs Pressure","style":{"stroke":"rgba(251,191,36,0.25)"}},{"id":"n8","x":100,"y":300,"w":200,"h":45,"label":"Refined","sublabel":"weak hypothesis improved","style":{"stroke":"rgba(96,165,250,0.25)"}},{"id":"n9","x":400,"y":300,"w":200,"h":45,"label":"Refined","sublabel":"weak hypothesis improved","style":{"stroke":"rgba(96,165,250,0.25)"}},{"id":"n10","x":80,"y":390,"w":200,"h":45,"label":"Synthesis 1","sublabel":"partial merge","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"n11","x":420,"y":390,"w":200,"h":45,"label":"Synthesis 2","sublabel":"partial merge","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"n12","x":200,"y":460,"w":300,"h":35,"label":"CONCLUSION: all strands merged","style":{"stroke":"rgba(74,222,128,0.3)","fontWeight":"600"}}],"arrows":[{"from":"root","to":"n2","direction":"down"},{"from":"root","to":"n3","direction":"down"},{"from":"root","to":"n4","direction":"down"},{"from":"root","to":"n5","direction":"down"},{"from":"n3","to":"n6","direction":"down"},{"from":"n2","to":"n6","direction":"down"},{"from":"n3","to":"n7","direction":"down"},{"from":"n5","to":"n7","direction":"down"},{"from":"n3","to":"n8","direction":"down"},{"from":"n5","to":"n8","direction":"down"},{"from":"n6","to":"n9","direction":"down"},{"from":"n4","to":"n9","direction":"down"},{"from":"n3","to":"n10","direction":"down"},{"from":"n2","to":"n10","direction":"down"},{"from":"n6","to":"n10","direction":"down"},{"from":"n8","to":"n11","direction":"down"},{"from":"n9","to":"n11","direction":"down"},{"from":"n7","to":"n11","direction":"down"},{"from":"n10","to":"n12","direction":"down"},{"from":"n11","to":"n12","direction":"down"}],"labels":[{"x":350,"y":85,"text":"4 hypotheses (branch)","color":"#6B6B74","size":"10"},{"x":300,"y":195,"text":"contrast & refine","color":"#6B6B74","size":"10"},{"x":350,"y":375,"text":"synthesis","color":"#6B6B74","size":"10"}]}'></div>
 				</div>
 
 				<div class="content-section" id="why-different">

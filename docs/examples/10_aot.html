@@ -6,6 +6,7 @@
 	<title>10 - 思维原子：结构化规划 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="思维原子方法论，用于多步骤计算的原子规划，依赖管理和确定性执行。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -67,34 +68,16 @@
 
 				<div class="content-section" id="three-layers">
 					<h2>三层架构</h2>
-					<div class="diagram">┌─────────────────────────────────┐
-│   LLM（规划层）                   │
-│   - 提出原子化计划                 │
-│   - 不执行                        │
-└─────────────────────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│   验证器（安全层）                 │
-│   - 检查计划结构                   │
-│   - 验证依赖关系                   │
-└─────────────────────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│   执行器（执行层）                 │
-│   - 确定性地运行原子               │
-│   - 管理状态                      │
-└─────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":600,"height":340,"title":"三层架构","nodes":[{"id":"llm","x":125,"y":20,"w":350,"h":72,"label":"LLM（规划层）","sublabel":"提出原子化计划 / 不执行","style":{"fill":"#111114","stroke":"rgba(96,165,250,0.3)","textColor":"#F0F0F2"}},{"id":"validator","x":125,"y":130,"w":350,"h":72,"label":"验证器（安全层）","sublabel":"检查计划结构 / 验证依赖关系","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)","textColor":"#F0F0F2"}},{"id":"executor","x":125,"y":240,"w":350,"h":72,"label":"执行器（执行层）","sublabel":"确定性地运行原子 / 管理状态","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.3)","textColor":"#F0F0F2"}}],"arrows":[{"from":"llm","to":"validator","direction":"down","style":{"stroke":"rgba(255,255,255,0.15)"}},{"from":"validator","to":"executor","direction":"down","style":{"stroke":"rgba(255,255,255,0.15)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="why-separation">
 					<h2>为什么分离很重要</h2>
 					<h3>传统 LLM 方法（ReAct）</h3>
-					<div class="diagram">LLM 思考 → LLM 行动 → LLM 思考 → LLM 行动
-**问题：** 执行逻辑存在于模型内部（黑盒）</div>
+					<div class="diagram" data-diagram='{"width":600,"height":140,"title":"传统 LLM 方法（ReAct）","nodes":[{"id":"think1","x":20,"y":30,"w":110,"h":50,"label":"LLM 思考","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)","textColor":"#F0F0F2"}},{"id":"act1","x":150,"y":30,"w":110,"h":50,"label":"LLM 行动","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)","textColor":"#F0F0F2"}},{"id":"think2","x":280,"y":30,"w":110,"h":50,"label":"LLM 思考","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)","textColor":"#F0F0F2"}},{"id":"act2","x":410,"y":30,"w":110,"h":50,"label":"LLM 行动","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)","textColor":"#F0F0F2"}}],"arrows":[{"from":"think1","to":"act1","direction":"right","style":{"stroke":"rgba(255,255,255,0.15)"}},{"from":"act1","to":"think2","direction":"right","style":{"stroke":"rgba(255,255,255,0.15)"}},{"from":"think2","to":"act2","direction":"right","style":{"stroke":"rgba(255,255,255,0.15)"}}],"labels":[{"x":300,"y":110,"text":"问题：执行逻辑存在于模型内部（黑盒）","color":"#A0A0A8","size":"12","anchor":"middle"}]}'></div>
 
 					<h3>原子思维方法</h3>
-					<div class="diagram">LLM 规划 → 系统验证 → 系统执行
-**优势：** 执行逻辑存在于代码中（白盒）</div>
+					<div class="diagram" data-diagram='{"width":600,"height":140,"title":"原子思维方法","nodes":[{"id":"plan","x":60,"y":30,"w":140,"h":50,"label":"LLM 规划","style":{"fill":"#111114","stroke":"rgba(96,165,250,0.3)","textColor":"#F0F0F2"}},{"id":"verify","x":230,"y":30,"w":140,"h":50,"label":"系统验证","style":{"fill":"#111114","stroke":"rgba(251,191,36,0.3)","textColor":"#F0F0F2"}},{"id":"exec","x":400,"y":30,"w":140,"h":50,"label":"系统执行","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.3)","textColor":"#F0F0F2"}}],"arrows":[{"from":"plan","to":"verify","direction":"right","style":{"stroke":"rgba(255,255,255,0.15)"}},{"from":"verify","to":"exec","direction":"right","style":{"stroke":"rgba(255,255,255,0.15)"}}],"labels":[{"x":300,"y":110,"text":"优势：执行逻辑存在于代码中（白盒）","color":"#A0A0A8","size":"12","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="mental-model">
@@ -146,21 +129,7 @@
 				<div class="content-section" id="dependency-graph">
 					<h2>依赖图</h2>
 					<p>原子构成一个<strong>有向无环图（DAG）</strong>：</p>
-					<div class="diagram">     ┌─────┐
-     │  1  │ add(15, 7)
-     └──┬──┘
-        │
-     ┌──▼──┐
-     │  2  │ multiply(result_1, 3)
-     └──┬──┘
-        │
-     ┌──▼──┐
-     │  3  │ subtract(result_2, 10)
-     └──┬──┘
-        │
-     ┌──▼──┐
-     │  4  │ final
-     └─────┘</div>
+					<div class="diagram" data-diagram='{"width":600,"height":380,"title":"依赖图（DAG）","nodes":[{"id":"a1","x":200,"y":20,"w":200,"h":60,"label":"1","sublabel":"add(15, 7)","style":{"fill":"#111114","stroke":"rgba(96,165,250,0.3)","textColor":"#F0F0F2"}},{"id":"a2","x":200,"y":120,"w":200,"h":60,"label":"2","sublabel":"multiply(result_1, 3)","style":{"fill":"#111114","stroke":"rgba(96,165,250,0.3)","textColor":"#F0F0F2"}},{"id":"a3","x":200,"y":220,"w":200,"h":60,"label":"3","sublabel":"subtract(result_2, 10)","style":{"fill":"#111114","stroke":"rgba(96,165,250,0.3)","textColor":"#F0F0F2"}},{"id":"a4","x":200,"y":320,"w":200,"h":50,"label":"4","sublabel":"final","style":{"fill":"#111114","stroke":"rgba(74,222,128,0.3)","textColor":"#F0F0F2"}}],"arrows":[{"from":"a1","to":"a2","direction":"down","style":{"stroke":"rgba(255,255,255,0.15)"}},{"from":"a2","to":"a3","direction":"down","style":{"stroke":"rgba(255,255,255,0.15)"}},{"from":"a3","to":"a4","direction":"down","style":{"stroke":"rgba(255,255,255,0.15)"}}]}'></div>
 					<ul>
 						<li>可以按拓扑顺序执行</li>
 						<li>可以并行化独立分支</li>

@@ -6,6 +6,7 @@
 	<title>04 - 思考：推理与问题解决 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="配置 LLM 进行逻辑推理，理解纯 LLM 推理的局限性，以及何时需要外部工具。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -48,108 +49,37 @@
 					<p><strong>推理智能体</strong>是一种通过精心设计的系统提示词（System Prompt）配置的 LLM，能够执行逻辑分析、数学计算和多步问题求解。</p>
 
 					<h3>类比理解</h3>
-					<div class="diagram">普通对话                     推理智能体
-─────────────               ──────────────────
-"你能帮我吗？"              "我是一名数学家。
-"当然！你需要什么？"         我系统地分析问题
-                            并计算精确答案。"</div>
+					<div class="diagram" data-diagram='{"width":600,"height":240,"title":"类比理解","nodes":[{"id":"normal","x":20,"y":30,"w":260,"h":180,"label":"普通对话","style":{"stroke":"rgba(248,113,113,0.2)","fontSize":"14","fontWeight":"600"}},{"id":"reasoning","x":320,"y":30,"w":260,"h":180,"label":"推理智能体","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"14","fontWeight":"600"}}],"labels":[{"x":150,"y":90,"text":"\"你能帮我吗？\"","color":"#A0A0A8","size":"12","anchor":"middle"},{"x":150,"y":120,"text":"\"当然！你需要什么？\"","color":"#A0A0A8","size":"12","anchor":"middle"},{"x":450,"y":80,"text":"\"我是一名数学家。\"","color":"#F0F0F2","size":"12","anchor":"middle"},{"x":450,"y":105,"text":"\"我系统地分析问题","color":"#F0F0F2","size":"12","anchor":"middle"},{"x":450,"y":130,"text":"并计算精确答案。\"","color":"#F0F0F2","size":"12","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="challenges">
 					<h2>推理的挑战</h2>
 					<h3>为什么推理对 LLM 来说很难</h3>
-					<div class="diagram">┌───────────────────────────────────────┐
-│  LLM 训练                             │
-│  "预测文本中的下一个词"               │
-│                                       │
-│  并非显式训练以下能力：               │
-│  • 逐步逻辑推理                       │
-│  • 算术计算                           │
-│  • 追踪多个变量                       │
-│  • 系统性问题分解                     │
-└───────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":500,"height":250,"title":"为什么推理对 LLM 来说很难","nodes":[{"id":"box","x":40,"y":15,"w":420,"h":220,"label":"LLM 训练\n\"预测文本中的下一个词\"\n\n并非显式训练以下能力：\n• 逐步逻辑推理\n• 算术计算\n• 追踪多个变量\n• 系统性问题分解","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"12"}}]}'></div>
 					<p>然而，它们可以从训练数据中学习推理模式，并通过系统提示词加以引导。</p>
 				</div>
 
 				<div class="content-section" id="system-prompt-reasoning">
 					<h2>通过系统提示词实现推理</h2>
 					<h3>配置模式</h3>
-					<div class="diagram">┌─────────────────────────────────────────┐
-│  系统提示词组件                         │
-├─────────────────────────────────────────┤
-│  1. 角色："专业推理者"                  │
-│  2. 任务："分析并解决问题"              │
-│  3. 方法："计算精确答案"                │
-│  4. 输出："单个数值"                    │
-└─────────────────────────────────────────┘
-         ↓
-    推理行为</div>
+					<div class="diagram" data-diagram='{"width":500,"height":300,"title":"配置模式","nodes":[{"id":"box","x":50,"y":15,"w":400,"h":200,"label":"系统提示词组件\n\n1. 角色：\"专业推理者\"\n2. 任务：\"分析并解决问题\"\n3. 方法：\"计算精确答案\"\n4. 输出：\"单个数值\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"behavior","x":175,"y":245,"w":150,"h":35,"label":"推理行为","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"13","fontWeight":"600"}}],"arrows":[{"from":"box","to":"behavior","direction":"down","style":{"color":"rgba(74,222,128,0.4)"}}]}'></div>
 
 					<h3>推理任务类型</h3>
-					<div class="diagram">定量推理（本示例）：
-问题 → 统计实体 → 计算 → 单位换算 → 答案
-
-逻辑推理：
-前提 → 应用规则 → 推导结论 → 答案
-
-分析推理：
-数据 → 识别模式 → 形成假设 → 得出结论</div>
+					<div class="diagram" data-diagram='{"width":650,"height":250,"title":"推理任务类型","nodes":[{"id":"q1","x":150,"y":20,"w":80,"h":50,"label":"问题","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"q2","x":240,"y":20,"w":80,"h":50,"label":"统计实体","style":{"stroke":"rgba(96,165,250,0.2)"}},{"id":"q3","x":330,"y":20,"w":80,"h":50,"label":"计算","style":{"stroke":"rgba(96,165,250,0.2)"}},{"id":"q4","x":420,"y":20,"w":80,"h":50,"label":"单位换算","style":{"stroke":"rgba(96,165,250,0.2)"}},{"id":"q5","x":520,"y":20,"w":70,"h":50,"label":"答案","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"l1","x":150,"y":100,"w":80,"h":50,"label":"前提","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"l2","x":250,"y":100,"w":80,"h":50,"label":"应用规则","style":{"stroke":"rgba(251,191,36,0.2)"}},{"id":"l3","x":360,"y":100,"w":80,"h":50,"label":"推导结论","style":{"stroke":"rgba(251,191,36,0.2)"}},{"id":"l4","x":480,"y":100,"w":70,"h":50,"label":"答案","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"a1","x":150,"y":180,"w":80,"h":50,"label":"数据","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"a2","x":250,"y":180,"w":80,"h":50,"label":"识别模式","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"a3","x":360,"y":180,"w":80,"h":50,"label":"形成假设","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"a4","x":480,"y":180,"w":80,"h":50,"label":"得出结论","style":{"stroke":"rgba(184,196,208,0.2)"}}],"arrows":[{"from":"q1","to":"q2","direction":"right","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"q2","to":"q3","direction":"right","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"q3","to":"q4","direction":"right","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"q4","to":"q5","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}},{"from":"l1","to":"l2","direction":"right","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"l2","to":"l3","direction":"right","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"l3","to":"l4","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}},{"from":"a1","to":"a2","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"a2","to":"a3","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"a3","to":"a4","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}}],"labels":[{"x":80,"y":45,"text":"定量推理","color":"rgba(96,165,250,0.8)","size":"11","anchor":"middle","weight":"600"},{"x":80,"y":125,"text":"逻辑推理","color":"rgba(251,191,36,0.8)","size":"11","anchor":"middle","weight":"600"},{"x":80,"y":205,"text":"分析推理","color":"rgba(184,196,208,0.7)","size":"11","anchor":"middle","weight":"600"}]}'></div>
 				</div>
 
 				<div class="content-section" id="how-llm-reasons">
 					<h2>LLM 如何"推理"</h2>
 					<h3>模式匹配 vs 真正的推理</h3>
-					<div class="diagram">┌─────────────────────────────────────────────┐
-│  LLM 实际的工作方式                         │
-│                                             │
-│  1. 模式识别                                │
-│     "这看起来是一个计数问题"                │
-│                                             │
-│  2. 模板应用                                │
-│     "类似的问题遵循这种模式"                │
-│                                             │
-│  3. 统计推断                                │
-│     "这些数字可能以这种方式组合"            │
-│                                             │
-│  4. 学到的程序                              │
-│     "我见过这种类型的计算"                  │
-└─────────────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":500,"height":330,"title":"LLM 实际的工作方式","nodes":[{"id":"n1","x":40,"y":15,"w":420,"h":60,"label":"1. 模式识别","sublabel":"\"这看起来是一个计数问题\"","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"n2","x":40,"y":90,"w":420,"h":60,"label":"2. 模板应用","sublabel":"\"类似的问题遵循这种模式\"","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"n3","x":40,"y":165,"w":420,"h":60,"label":"3. 统计推断","sublabel":"\"这些数字可能以这种方式组合\"","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"n4","x":40,"y":240,"w":420,"h":60,"label":"4. 学到的程序","sublabel":"\"我见过这种类型的计算\"","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"n1","to":"n2","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"n2","to":"n3","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"n3","to":"n4","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}]}'></div>
 
 					<h3>推理过程</h3>
-					<div class="diagram">输入：复杂应用题
-         ↓
-    ┌────────────┐
-    │   解析     │  识别实体和关系
-    └────────────┘
-         ↓
-    ┌────────────┐
-    │   分解     │  拆分为子问题
-    └────────────┘
-         ↓
-    ┌────────────┐
-    │   计算     │  执行算术运算
-    └────────────┘
-         ↓
-    ┌────────────┐
-    │   综合     │  合并结果
-    └────────────┘
-         ↓
-     最终答案</div>
+					<div class="diagram" data-diagram='{"width":400,"height":400,"title":"推理过程","nodes":[{"id":"input","x":120,"y":10,"w":160,"h":40,"label":"输入：复杂应用题","style":{"fill":"rgba(96,165,250,0.12)","stroke":"rgba(96,165,250,0.3)","fontSize":"11"}},{"id":"parse","x":120,"y":80,"w":160,"h":50,"label":"解析","sublabel":"识别实体和关系","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"decompose","x":120,"y":160,"w":160,"h":50,"label":"分解","sublabel":"拆分为子问题","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"calculate","x":120,"y":240,"w":160,"h":50,"label":"计算","sublabel":"执行算术运算","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"synthesize","x":120,"y":320,"w":160,"h":50,"label":"综合","sublabel":"合并结果","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"input","to":"parse","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"parse","to":"decompose","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"decompose","to":"calculate","direction":"down","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"calculate","to":"synthesize","direction":"down","style":{"color":"rgba(74,222,128,0.4)"}}],"labels":[{"x":200,"y":390,"text":"最终答案","color":"rgba(74,222,128,0.8)","size":"13","anchor":"middle","weight":"600"}]}'></div>
 				</div>
 
 				<div class="content-section" id="complexity">
 					<h2>问题复杂度层级</h2>
-					<div class="diagram">简单                                        困难
-│                                             │
-│  简单     多步      嵌套       隐式         │
-│  算术     逻辑      条件       推理         │
-│                                             │
-└─────────────────────────────────────────────┘
-
-示例：
-简单：  "5 + 3 等于多少？"
-中等：  "如果 3 个苹果每个 2 美元，总共多少钱？"
-困难：  "统计具有复杂家庭关系的家庭成员人数"</div>
+					<div class="diagram" data-diagram='{"width":600,"height":260,"title":"问题复杂度层级","nodes":[{"id":"simple","x":20,"y":20,"w":120,"h":60,"label":"简单","sublabel":"算术","style":{"stroke":"rgba(74,222,128,0.3)"}},{"id":"multi","x":160,"y":20,"w":120,"h":60,"label":"多步","sublabel":"逻辑","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"nested","x":300,"y":20,"w":120,"h":60,"label":"嵌套","sublabel":"条件","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"implicit","x":440,"y":20,"w":140,"h":60,"label":"隐式","sublabel":"推理","style":{"stroke":"rgba(248,113,113,0.3)"}},{"id":"bar","x":20,"y":95,"w":560,"h":6,"label":"","style":{"fill":"rgba(184,196,208,0.12)","stroke":"rgba(184,196,208,0.2)"}}],"labels":[{"x":20,"y":120,"text":"简单","color":"rgba(74,222,128,0.8)","size":"11","anchor":"start","weight":"600"},{"x":580,"y":120,"text":"困难","color":"rgba(248,113,113,0.8)","size":"11","anchor":"end","weight":"600"},{"x":300,"y":155,"text":"示例：","color":"#6B6B74","size":"11","anchor":"middle"},{"x":300,"y":180,"text":"简单：\"5 + 3 等于多少？\"","color":"#A0A0A8","size":"11","anchor":"middle"},{"x":300,"y":205,"text":"中等：\"如果 3 个苹果每个 2 美元，总共多少钱？\"","color":"#A0A0A8","size":"11","anchor":"middle"},{"x":300,"y":230,"text":"困难：\"统计具有复杂家庭关系的家庭成员人数\"","color":"#A0A0A8","size":"11","anchor":"middle"}]}'></div>
 
 					<h3>本示例的复杂度</h3>
 					<p>土豆问题<strong>极其复杂</strong>：</p>
@@ -178,28 +108,17 @@
 					<h2>改进推理：演进路径</h2>
 
 					<h3>级别 1：纯提示（本示例）</h3>
-					<div class="diagram">用户 → LLM → 答案
-       ↑
-    系统提示词</div>
+					<div class="diagram" data-diagram='{"width":500,"height":150,"title":"级别 1：纯提示","nodes":[{"id":"user","x":50,"y":20,"w":100,"h":50,"label":"用户","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"llm","x":200,"y":20,"w":100,"h":50,"label":"LLM","style":{"stroke":"rgba(184,196,208,0.25)"}},{"id":"answer","x":350,"y":20,"w":100,"h":50,"label":"答案","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"user","to":"llm","direction":"right","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"llm","to":"answer","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}}],"labels":[{"x":250,"y":110,"text":"↑ 系统提示词","color":"rgba(251,191,36,0.8)","size":"11","anchor":"middle"}]}'></div>
 					<p>局限性：所有推理都在 LLM 内部完成，没有验证，没有工具，过程不可见。</p>
 
 					<h3>级别 2：思维链（Chain-of-Thought）</h3>
-					<div class="diagram">用户 → LLM → 展示过程 → 答案
-       ↑
-    "解释你的推理"</div>
+					<div class="diagram" data-diagram='{"width":620,"height":150,"title":"级别 2：思维链","nodes":[{"id":"user","x":20,"y":20,"w":90,"h":50,"label":"用户","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"llm","x":140,"y":20,"w":90,"h":50,"label":"LLM","style":{"stroke":"rgba(184,196,208,0.25)"}},{"id":"process","x":260,"y":20,"w":120,"h":50,"label":"展示过程","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"answer","x":410,"y":20,"w":90,"h":50,"label":"答案","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"user","to":"llm","direction":"right","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"llm","to":"process","direction":"right","style":{"color":"rgba(251,191,36,0.4)"}},{"from":"process","to":"answer","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}}],"labels":[{"x":185,"y":110,"text":"↑ \"解释你的推理\"","color":"rgba(251,191,36,0.8)","size":"11","anchor":"middle"}]}'></div>
 
 					<h3>级别 3：工具增强（simple-agent）</h3>
-					<div class="diagram">用户 → LLM ⟷ 工具 → 答案
-       ↑    （计算器）
-    系统提示词</div>
+					<div class="diagram" data-diagram='{"width":620,"height":160,"title":"级别 3：工具增强","nodes":[{"id":"user","x":20,"y":20,"w":90,"h":50,"label":"用户","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"llm","x":140,"y":20,"w":90,"h":50,"label":"LLM","style":{"stroke":"rgba(184,196,208,0.25)"}},{"id":"tool","x":260,"y":20,"w":120,"h":50,"label":"工具","sublabel":"计算器","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"answer","x":410,"y":20,"w":90,"h":50,"label":"答案","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"user","to":"llm","direction":"right","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"llm","to":"tool","direction":"right","style":{"color":"rgba(251,191,36,0.4)"}},{"from":"tool","to":"llm","direction":"left","style":{"color":"rgba(251,191,36,0.3)","dashed":true}},{"from":"tool","to":"answer","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}}],"labels":[{"x":185,"y":120,"text":"↑ 系统提示词","color":"rgba(251,191,36,0.8)","size":"11","anchor":"middle"}]}'></div>
 
 					<h3>级别 4：ReAct 模式（react-agent）</h3>
-					<div class="diagram">用户 → LLM → 思考 → 行动 → 观察
-       ↑      ↓      ↓      ↓
-    系统    推理    工具    结果
-    提示词         使用
-       ↑           ↓       ↓
-       └───────────迭代────┘</div>
+					<div class="diagram" data-diagram='{"width":650,"height":200,"title":"ReAct 模式","nodes":[{"id":"user","x":10,"y":20,"w":80,"h":50,"label":"用户","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"llm","x":110,"y":20,"w":80,"h":50,"label":"LLM","style":{"stroke":"rgba(184,196,208,0.25)"}},{"id":"think","x":210,"y":20,"w":80,"h":50,"label":"思考","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"act","x":310,"y":20,"w":80,"h":50,"label":"行动","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"observe","x":410,"y":20,"w":80,"h":50,"label":"观察","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"user","to":"llm","direction":"right","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"llm","to":"think","direction":"right","style":{"color":"rgba(96,165,250,0.4)"}},{"from":"think","to":"act","direction":"right","style":{"color":"rgba(251,191,36,0.4)"}},{"from":"act","to":"observe","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}},{"from":"observe","to":"llm","direction":"left","style":{"color":"rgba(184,196,208,0.35)","dashed":true}}],"labels":[{"x":150,"y":95,"text":"系统提示词","color":"#6B6B74","size":"10","anchor":"middle"},{"x":250,"y":95,"text":"推理","color":"#6B6B74","size":"10","anchor":"middle"},{"x":350,"y":95,"text":"工具使用","color":"#6B6B74","size":"10","anchor":"middle"},{"x":450,"y":95,"text":"结果","color":"#6B6B74","size":"10","anchor":"middle"},{"x":260,"y":145,"text":"← 迭代循环 →","color":"rgba(184,196,208,0.5)","size":"11","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="comparison">

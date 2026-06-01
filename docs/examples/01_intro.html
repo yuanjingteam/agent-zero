@@ -6,6 +6,7 @@
 	<title>01 - 入门：基本 LLM 交互 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="学习在本地机器上运行大语言模型的基本概念，加载 GGUF 模型并进行基本的提示/响应交互。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -58,14 +59,7 @@
 					<h2>核心组件</h2>
 
 					<h3>1. 模型文件（GGUF 格式）</h3>
-					<div class="diagram">┌─────────────────────────────┐
-│   Qwen3-1.7B-Q8_0.gguf     │
-│   (Model Weights File)      │
-│                             │
-│  • Stores learned patterns  │
-│  • Quantized for efficiency │
-│  • Loaded into RAM/VRAM     │
-└─────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":520,"height":200,"title":"GGUF Model File","nodes":[{"id":"box","x":60,"y":20,"w":400,"h":160,"label":"Qwen3-1.7B-Q8_0.gguf\n(Model Weights File)","sublabel":"Stores learned patterns · Quantized · Loaded into RAM/VRAM","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"14","fontWeight":"600"}}]}'></div>
 					<ul>
 						<li><strong>GGUF</strong>：为 llama.cpp 优化的文件格式</li>
 						<li><strong>量化（Quantization）</strong>：减小模型大小（例如，8 位代替 16 位）</li>
@@ -73,29 +67,13 @@
 					</ul>
 
 					<h3>2. 推理管道</h3>
-					<div class="diagram">User Input → Model → Generation → Response
-    ↓          ↓          ↓           ↓
- "Hello"   Context   Sampling    "Hi there!"</div>
+					<div class="diagram" data-diagram='{"width":700,"height":140,"title":"Inference Pipeline","nodes":[{"id":"input","x":20,"y":30,"w":120,"h":60,"label":"User Input","sublabel":"\"Hello\"","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"model","x":190,"y":30,"w":120,"h":60,"label":"Model","sublabel":"Context","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"gen","x":360,"y":30,"w":120,"h":60,"label":"Generation","sublabel":"Sampling","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"out","x":530,"y":30,"w":130,"h":60,"label":"Response","sublabel":"\"Hi there!\"","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"input","to":"model","direction":"right"},{"from":"model","to":"gen","direction":"right"},{"from":"gen","to":"out","direction":"right"}]}'></div>
 					<p><strong>流程图：</strong></p>
-					<div class="diagram">┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│  Prompt  │ --> │ Context  │ --> │  Model   │ --> │ Response │
-│          │     │ (Memory) │     │(Weights) │     │  (Text)  │
-└──────────┘     └──────────┘     └──────────┘     └──────────┘</div>
+					<div class="diagram" data-diagram='{"width":700,"height":120,"title":"Pipeline Flow","nodes":[{"id":"p","x":20,"y":25,"w":120,"h":60,"label":"Prompt","style":{}},{"id":"c","x":190,"y":25,"w":120,"h":60,"label":"Context","sublabel":"(Memory)","style":{}},{"id":"m","x":360,"y":25,"w":120,"h":60,"label":"Model","sublabel":"(Weights)","style":{}},{"id":"r","x":530,"y":25,"w":130,"h":60,"label":"Response","sublabel":"(Text)","style":{"stroke":"rgba(74,222,128,0.2)"}}],"arrows":[{"from":"p","to":"c","direction":"right"},{"from":"c","to":"m","direction":"right"},{"from":"m","to":"r","direction":"right"}]}'></div>
 
 					<h3>3. 上下文窗口</h3>
 					<p><strong>上下文（Context）</strong>是模型的工作记忆：</p>
-					<div class="diagram">┌─────────────────────────────────────────┐
-│           Context Window                │
-│  ┌─────────────────────────────────┐   │
-│  │ System Prompt (if any)          │   │
-│  ├─────────────────────────────────┤   │
-│  │ User: "do you know node-llama?" │   │
-│  ├─────────────────────────────────┤   │
-│  │ AI: "Yes, I'm familiar..."      │   │
-│  ├─────────────────────────────────┤   │
-│  │ (Space for more conversation)   │   │
-│  └─────────────────────────────────┘   │
-└─────────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":520,"height":280,"title":"Context Window","nodes":[{"id":"outer","x":30,"y":15,"w":460,"h":250,"label":"Context Window","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"13"}},{"id":"sys","x":60,"y":55,"w":400,"h":40,"label":"System Prompt (if any)","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.2)"}},{"id":"user","x":60,"y":105,"w":400,"h":40,"label":"User: \"do you know node-llama?\"","style":{"fill":"#18181C"}},{"id":"ai","x":60,"y":155,"w":400,"h":40,"label":"AI: \"Yes, I'm familiar...\"","style":{"fill":"#18181C"}},{"id":"space","x":60,"y":205,"w":400,"h":40,"label":"(Space for more conversation)","style":{"fill":"#18181C","stroke":"rgba(255,255,255,0.04)","textColor":"#6B6B74"}}]}'></div>
 					<ul>
 						<li>大小有限（例如 2048、4096 或 8192 个 token）</li>
 						<li>当上下文已满时，必须移除旧消息</li>
@@ -107,23 +85,9 @@
 					<h2>LLM 如何生成响应</h2>
 					<h3>逐 Token 生成</h3>
 					<p>LLM 不会一次性生成整个句子。它们一次预测一个 <strong>token（词元）</strong>：</p>
-					<div class="diagram">Prompt: "What is AI?"
-
-Generation Process:
-"What is AI?" → [Model] → "AI"
-"What is AI? AI" → [Model] → "is"
-"What is AI? AI is" → [Model] → "a"
-"What is AI? AI is a" → [Model] → "field"
-... continues until stop condition</div>
+					<div class="diagram" data-diagram='{"width":560,"height":230,"title":"Token Generation","nodes":[{"id":"prompt","x":20,"y":15,"w":520,"h":36,"label":"Prompt: \"What is AI?\"","style":{"stroke":"rgba(96,165,250,0.2)","fontSize":"12"}},{"id":"model","x":200,"y":85,"w":160,"h":120,"label":"Model\nProcesses\n& Predicts","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12"}},{"id":"t1","x":400,"y":80,"w":140,"h":28,"label":"Token 1: \"AI\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t2","x":400,"y":114,"w":140,"h":28,"label":"Token 2: \"is\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t3","x":400,"y":148,"w":140,"h":28,"label":"Token 3: \"a\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t4","x":400,"y":182,"w":140,"h":28,"label":"Token 4: \"field\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}}],"arrows":[{"from":"prompt","to":"model","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"model","to":"t1","direction":"right","label":"...","style":{"color":"rgba(74,222,128,0.3)"}}]}'></div>
 					<p><strong>可视化：</strong></p>
-					<div class="diagram">Input Prompt
-     ↓
-┌────────────┐
-│   Model    │ → Token 1: "AI"
-│ Processes  │ → Token 2: "is"
-│  & Predicts│ → Token 3: "a"
-└────────────┘ → Token 4: "field"
-                → ...</div>
+					<div class="diagram" data-diagram='{"width":400,"height":260,"title":"Token Flow","nodes":[{"id":"input","x":120,"y":10,"w":160,"h":40,"label":"Input Prompt","style":{"stroke":"rgba(96,165,250,0.2)"}},{"id":"model","x":120,"y":90,"w":160,"h":100,"label":"Model","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"14","fontWeight":"600"}}],"arrows":[{"from":"input","to":"model","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}],"labels":[{"x":340,"y":100,"text":"→ Token 1: \"AI\"","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"},{"x":340,"y":120,"text":"→ Token 2: \"is\"","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"},{"x":340,"y":140,"text":"→ Token 3: \"a\"","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"},{"x":340,"y":160,"text":"→ Token 4: \"field\"","color":"rgba(74,222,128,0.7)","anchor":"start","size":"12"},{"x":340,"y":180,"text":"→ ...","color":"#6B6B74","anchor":"start","size":"12"}]}'></div>
 				</div>
 
 				<div class="content-section" id="agent-concepts">
@@ -150,15 +114,7 @@ Generation Process:
 
 					<h3>3. 资源管理</h3>
 					<p>LLM 会消耗大量资源：</p>
-					<div class="diagram">Model Loading
-     ↓
-┌─────────────────┐
-│  RAM/VRAM Usage │  ← Models need gigabytes
-│  CPU/GPU Time   │  ← Inference takes time
-│  Memory Leaks?  │  ← Must cleanup properly
-└─────────────────┘
-     ↓
-Proper Disposal</div>
+					<div class="diagram" data-diagram='{"width":440,"height":240,"title":"Resource Management","nodes":[{"id":"load","x":140,"y":10,"w":160,"h":40,"label":"Model Loading","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"res","x":60,"y":90,"w":320,"h":100,"label":"RAM/VRAM Usage\nCPU/GPU Time\nMemory Management","style":{"stroke":"rgba(248,113,113,0.2)","fontSize":"12"}},{"id":"dispose","x":140,"y":230,"w":160,"h":40,"label":"Proper Disposal","style":{"stroke":"rgba(74,222,128,0.2)"}}],"arrows":[{"from":"load","to":"res","direction":"down","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"res","to":"dispose","direction":"down","style":{"color":"rgba(74,222,128,0.3)"}}],"labels":[{"x":400,"y":105,"text":"← Needs GBs","color":"#6B6B74","anchor":"start","size":"10"},{"x":400,"y":125,"text":"← Takes time","color":"#6B6B74","anchor":"start","size":"10"},{"x":400,"y":145,"text":"← Must cleanup","color":"#6B6B74","anchor":"start","size":"10"}]}'></div>
 				</div>
 
 				<div class="content-section" id="why-important">
@@ -173,23 +129,7 @@ Proper Disposal</div>
 
 				<div class="content-section" id="architecture">
 					<h2>完整架构图解</h2>
-					<div class="diagram">┌──────────────────────────────────────────────────┐
-│            Your Application                      │
-│  ┌────────────────────────────────────────────┐ │
-│  │         node-llama-cpp Library             │ │
-│  │  ┌──────────────────────────────────────┐  │ │
-│  │  │      llama.cpp (C++ Runtime)         │  │ │
-│  │  │  ┌────────────────────────────────┐  │  │ │
-│  │  │  │   Model File (GGUF)            │  │  │ │
-│  │  │  │   • Qwen3-1.7B-Q8_0.gguf       │  │  │ │
-│  │  │  └────────────────────────────────┘  │  │ │
-│  │  └──────────────────────────────────────┘  │ │
-│  └────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────┘
-           ↕
-    ┌──────────────┐
-    │  CPU / GPU   │
-    └──────────────┘</div>
+					<div class="diagram" data-diagram='{"width":560,"height":340,"title":"Full Architecture","nodes":[{"id":"app","x":30,"y":10,"w":420,"h":260,"label":"Your Application","style":{"stroke":"rgba(184,196,208,0.12)","fontSize":"13"}},{"id":"lib","x":55,"y":50,"w":370,"h":200,"label":"node-llama-cpp Library","style":{"stroke":"rgba(184,196,208,0.12)","fontSize":"12"}},{"id":"cpp","x":80,"y":90,"w":320,"h":140,"label":"llama.cpp (C++ Runtime)","style":{"stroke":"rgba(184,196,208,0.12)","fontSize":"12"}},{"id":"model","x":105,"y":130,"w":270,"h":70,"label":"Model File (GGUF)\nQwen3-1.7B-Q8_0.gguf","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"11"}},{"id":"cpu","x":150,"y":300,"w":180,"h":40,"label":"CPU / GPU","style":{"stroke":"rgba(251,191,36,0.2)"}}],"arrows":[{"from":"model","to":"cpu","direction":"down","style":{"color":"rgba(251,191,36,0.25)","width":"1.5"}}],"labels":[{"x":240,"y":285,"text":"↕","color":"#6B6B74","size":"16"}]}'></div>
 					<p>这种分层架构允许你在基本 LLM 交互之上构建复杂的 AI Agent。</p>
 				</div>
 

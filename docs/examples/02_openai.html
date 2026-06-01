@@ -6,6 +6,7 @@
 	<title>02 - OpenAI 入门：使用专有模型 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="调用托管 LLM（GPT-4），了解温度控制和 Token 使用量，对比本地与云端的权衡。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -72,29 +73,7 @@
 				<div class="content-section" id="chat-completions">
 					<h2>聊天补全 API（Chat Completions API）</h2>
 					<h3>请求-响应周期</h3>
-					<div class="diagram">你（客户端）                    OpenAI（服务器）
-     |                                |
-     |  POST /v1/chat/completions    |
-     |  {                             |
-     |    model: "gpt-4o",            |
-     |    messages: [...]             |
-     |  }                             |
-     |------------------------------->|
-     |                                |
-     |        [处理中...]              |
-     |        [模型推理]               |
-     |        [生成响应]               |
-     |                                |
-     |  响应                          |
-     |  {                             |
-     |    choices: [{                 |
-     |      message: {                |
-     |        content: "..."          |
-     |      }                         |
-     |    }]                          |
-     |  }                             |
-     |<-------------------------------|
-     |                                |</div>
+					<div class="diagram" data-diagram='{"width":720,"height":260,"title":"Request-Response Cycle","nodes":[{"id":"client","x":30,"y":40,"w":160,"h":60,"label":"你（客户端）","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"server","x":500,"y":40,"w":180,"h":60,"label":"OpenAI（服务器）","style":{"stroke":"rgba(184,196,208,0.25)","fontSize":"13","fontWeight":"600"}},{"id":"req","x":250,"y":150,"w":200,"h":56,"label":"POST /v1/chat/completions\nmodel: \"gpt-4o\", messages: [...]","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.2)","fontSize":"10","mono":true}},{"id":"resp","x":250,"y":215,"w":200,"h":36,"label":"choices: [{ message: { content: \"...\" } }]","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"10","mono":true}}],"arrows":[{"from":"client","to":"server","direction":"right","style":{"color":"rgba(96,165,250,0.4)","width":"1.5"}},{"from":"server","to":"client","direction":"left","style":{"color":"rgba(74,222,128,0.4)","width":"1.5"}}],"labels":[{"x":350,"y":60,"text":"POST /v1/chat/completions","color":"rgba(96,165,250,0.7)","size":"11","anchor":"middle"},{"x":350,"y":78,"text":"model, messages, temperature...","color":"#6B6B74","size":"10","anchor":"middle"},{"x":350,"y":100,"text":"[Processing...] [Model Inference] [Generate Response]","color":"#A0A0A8","size":"10","anchor":"middle"},{"x":350,"y":130,"text":"Response","color":"rgba(74,222,128,0.7)","size":"11","anchor":"middle"}]}'></div>
 					<p><strong>关键点：</strong>每次请求都是独立的。API 不会存储对话历史。</p>
 				</div>
 
@@ -125,7 +104,7 @@
   { role: 'user', content: 'What is 15 * 24?' },
   { role: 'assistant', content: '15 * 24 = 360' },
   { role: 'user', content: 'What about dividing that by 3?' },
-  { role: 'assistant', content: '360 ÷ 3 = 120' },
+  { role: 'assistant', content: '360 / 3 = 120' },
 ]</code></pre>
 				</div>
 
@@ -135,11 +114,7 @@
 
 					<h3>什么是无状态？</h3>
 					<p>每次 API 调用都是独立的。模型不会记住之前的请求。</p>
-					<div class="diagram">请求 1："My name is Alice"
-响应 1："Hello Alice!"
-
-请求 2："What's my name?"
-响应 2："I don't know your name."  ← 没有记忆！</div>
+					<div class="diagram" data-diagram='{"width":660,"height":250,"title":"Stateless API","nodes":[{"id":"req1","x":40,"y":20,"w":260,"h":48,"label":"请求 1：\"My name is Alice\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"resp1","x":40,"y":80,"w":260,"h":48,"label":"响应 1：\"Hello Alice!\"","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"12"}},{"id":"req2","x":360,"y":20,"w":260,"h":48,"label":"请求 2：\"What's my name?\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"resp2","x":360,"y":80,"w":260,"h":48,"label":"响应 2：\"I don't know.\"","style":{"stroke":"rgba(248,113,113,0.4)","fontSize":"12"}}],"arrows":[{"from":"req1","to":"resp1","direction":"down","style":{"color":"rgba(96,165,250,0.3)"}},{"from":"req2","to":"resp2","direction":"down","style":{"color":"rgba(96,165,250,0.3)"}}],"labels":[{"x":330,"y":110,"text":"No Memory!","color":"rgba(248,113,113,0.8)","size":"13","anchor":"middle"},{"x":330,"y":130,"text":"Each request is completely independent","color":"#6B6B74","size":"11","anchor":"middle"},{"x":170,"y":160,"text":"Request 1","color":"#A0A0A8","size":"11","anchor":"middle"},{"x":490,"y":160,"text":"Request 2","color":"#A0A0A8","size":"11","anchor":"middle"},{"x":170,"y":180,"text":"(complete)","color":"#6B6B74","size":"10","anchor":"middle"},{"x":490,"y":180,"text":"(complete)","color":"#6B6B74","size":"10","anchor":"middle"},{"x":170,"y":200,"text":"self-contained","color":"#6B6B74","size":"10","anchor":"middle"},{"x":490,"y":200,"text":"self-contained","color":"#6B6B74","size":"10","anchor":"middle"}]}'></div>
 
 					<h3>如何维护上下文</h3>
 					<p>你必须发送完整的对话历史：</p>
@@ -167,12 +142,7 @@ const response2 = await client.chat.completions.create({
 
 					<h3>技术原理</h3>
 					<p>在生成每个 token 时，模型会为可能的下一个 token 分配概率：</p>
-					<div class="diagram">输入："The sky is"
-可能的下一个 token：
-  - "blue"     → 70% 概率
-  - "clear"    → 15% 概率
-  - "dark"     → 10% 概率
-  - "purple"   → 5% 概率</div>
+					<div class="diagram" data-diagram='{"width":600,"height":240,"title":"Token Probability","nodes":[{"id":"input","x":30,"y":30,"w":200,"h":44,"label":"输入：\"The sky is\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"blue","x":300,"y":20,"w":260,"h":32,"label":"\"blue\"  ->  70% 概率","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.4)","fontSize":"11"}},{"id":"clear","x":300,"y":60,"w":260,"h":32,"label":"\"clear\"  ->  15% 概率","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.2)","fontSize":"11"}},{"id":"dark","x":300,"y":100,"w":260,"h":32,"label":"\"dark\"  ->  10% 概率","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.2)","fontSize":"11"}},{"id":"purple","x":300,"y":140,"w":260,"h":32,"label":"\"purple\"  ->  5% 概率","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.2)","fontSize":"11"}}],"arrows":[{"from":"input","to":"blue","direction":"right","style":{"color":"rgba(74,222,128,0.4)"}},{"from":"input","to":"clear","direction":"right","style":{"color":"rgba(184,196,208,0.2)","dashed":true}},{"from":"input","to":"dark","direction":"right","style":{"color":"rgba(184,196,208,0.2)","dashed":true}},{"from":"input","to":"purple","direction":"right","style":{"color":"rgba(184,196,208,0.15)","dashed":true}}],"labels":[{"x":200,"y":210,"text":"Temperature controls how the model samples from these probabilities","color":"#6B6B74","size":"10","anchor":"middle"}]}'></div>
 
 					<h3>实用指南</h3>
 					<table>
@@ -190,19 +160,10 @@ const response2 = await client.chat.completions.create({
 				<div class="content-section" id="streaming">
 					<h2>流式传输（Streaming）：实时响应</h2>
 					<h3>非流式传输（默认）</h3>
-					<div class="diagram">用户："给我讲个故事"
-[等待...]
-[等待...]
-响应："从前有座山..."（一次性全部返回）</div>
+					<div class="diagram" data-diagram='{"width":520,"height":180,"title":"Non-Streaming","nodes":[{"id":"prompt","x":30,"y":20,"w":200,"h":44,"label":"用户：\"给我讲个故事\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"wait","x":270,"y":20,"w":110,"h":44,"label":"[等待...]","style":{"fill":"#18181C","stroke":"rgba(251,191,36,0.3)","fontSize":"12"}},{"id":"resp","x":420,"y":20,"w":70,"h":44,"label":"完整\n响应","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"12"}}],"arrows":[{"from":"prompt","to":"wait","direction":"right","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"wait","to":"resp","direction":"right","style":{"color":"rgba(74,222,128,0.3)"}}],"labels":[{"x":260,"y":110,"text":"User waits for entire response","color":"#A0A0A8","size":"11","anchor":"middle"},{"x":260,"y":130,"text":"Response delivered all at once","color":"#6B6B74","size":"10","anchor":"middle"}]}'></div>
 
 					<h3>流式传输</h3>
-					<div class="diagram">用户："给我讲个故事"
-"从前"
-"从前有"
-"从前有座"
-"从前有座山"
-"从前有座山上"
-...</div>
+					<div class="diagram" data-diagram='{"width":520,"height":230,"title":"Streaming","nodes":[{"id":"prompt","x":30,"y":20,"w":200,"h":44,"label":"用户：\"给我讲个故事\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"t1","x":290,"y":10,"w":100,"h":28,"label":"\"从前\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t2","x":290,"y":45,"w":100,"h":28,"label":"\"从前有\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t3","x":290,"y":80,"w":100,"h":28,"label":"\"从前有座\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t4","x":290,"y":115,"w":100,"h":28,"label":"\"从前有座山\"","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11"}},{"id":"t5","x":290,"y":150,"w":100,"h":28,"label":"...","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.15)","fontSize":"11"}}],"arrows":[{"from":"prompt","to":"t1","direction":"right","style":{"color":"rgba(74,222,128,0.3)"}},{"from":"t1","to":"t2","direction":"down","style":{"color":"rgba(74,222,128,0.2)"}},{"from":"t2","to":"t3","direction":"down","style":{"color":"rgba(74,222,128,0.2)"}},{"from":"t3","to":"t4","direction":"down","style":{"color":"rgba(74,222,128,0.2)"}},{"from":"t4","to":"t5","direction":"down","style":{"color":"rgba(74,222,128,0.15)"}}],"labels":[{"x":440,"y":30,"text":"Tokens arrive","color":"rgba(74,222,128,0.6)","size":"11","anchor":"start"},{"x":440,"y":48,"text":"one by one","color":"rgba(74,222,128,0.6)","size":"11","anchor":"start"},{"x":440,"y":70,"text":"in real-time","color":"#A0A0A8","size":"10","anchor":"start"}]}'></div>
 
 					<h3>何时使用哪种方式</h3>
 					<ul>
@@ -215,9 +176,7 @@ const response2 = await client.chat.completions.create({
 					<h2>Token（令牌）：大语言模型的货币</h2>
 					<h3>什么是 token？</h3>
 					<p>Token 是语言模型处理的基本单位。它们不完全等于单词，而是文本的片段。</p>
-					<div class="diagram">"Hello world"        → ["Hello", " world"]           = 2 个 token
-"coding"             → ["coding"]                    = 1 个 token
-"uncoded"            → ["un", "coded"]               = 2 个 token</div>
+					<div class="diagram" data-diagram='{"width":600,"height":180,"title":"Token Examples","nodes":[{"id":"in1","x":30,"y":20,"w":180,"h":36,"label":"\"Hello world\"","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12","mono":true}},{"id":"out1","x":260,"y":20,"w":280,"h":36,"label":"[\"Hello\", \" world\"]  = 2 tokens","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11","mono":true}},{"id":"in2","x":30,"y":70,"w":180,"h":36,"label":"\"coding\"","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12","mono":true}},{"id":"out2","x":260,"y":70,"w":280,"h":36,"label":"[\"coding\"]  = 1 token","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11","mono":true}},{"id":"in3","x":30,"y":120,"w":180,"h":36,"label":"\"uncoded\"","style":{"stroke":"rgba(184,196,208,0.2)","fontSize":"12","mono":true}},{"id":"out3","x":260,"y":120,"w":280,"h":36,"label":"[\"un\", \"coded\"]  = 2 tokens","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)","fontSize":"11","mono":true}}],"arrows":[{"from":"in1","to":"out1","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"in2","to":"out2","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"in3","to":"out3","direction":"right","style":{"color":"rgba(184,196,208,0.2)"}}]}'></div>
 
 					<h3>为什么 token 很重要</h3>
 					<ul>
@@ -246,12 +205,7 @@ const response2 = await client.chat.completions.create({
 							<p>非常快、成本最低，适合分类、提取等简单任务和高吞吐量处理。</p>
 						</div>
 					</div>
-					<div class="diagram">任务是否关键且复杂？
-├─ 是 → GPT-4o
-└─ 否
-   └─ 速度是否重要且任务简单？
-      ├─ 是 → GPT-3.5-turbo
-      └─ 否 → GPT-4o-mini</div>
+					<div class="diagram" data-diagram='{"width":640,"height":240,"title":"Model Selection","nodes":[{"id":"q1","x":200,"y":10,"w":240,"h":44,"label":"任务是否关键且复杂？","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"12","fontWeight":"600"}},{"id":"gpt4","x":40,"y":110,"w":160,"h":56,"label":"GPT-4o","sublabel":"最高质量、复杂推理","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"14","fontWeight":"600"}},{"id":"q2","x":280,"y":110,"w":180,"h":44,"label":"速度重要且任务简单？","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"11","fontWeight":"600"}},{"id":"turbo","x":300,"y":190,"w":140,"h":44,"label":"GPT-3.5-turbo","sublabel":"最快、最低成本","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"12","fontWeight":"600"}},{"id":"mini","x":500,"y":110,"w":120,"h":56,"label":"GPT-4o-mini","sublabel":"性价比最佳","style":{"stroke":"rgba(184,196,208,0.25)","fontSize":"12","fontWeight":"600"}}],"arrows":[{"from":"q1","to":"gpt4","direction":"down","label":"Yes","style":{"color":"rgba(96,165,250,0.4)"}},{"from":"q1","to":"q2","direction":"right","label":"No","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"q2","to":"turbo","direction":"down","label":"Yes","style":{"color":"rgba(74,222,128,0.4)"}},{"from":"q2","to":"mini","direction":"right","label":"No","style":{"color":"rgba(184,196,208,0.25)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="hybrid">
@@ -259,9 +213,7 @@ const response2 = await client.chat.completions.create({
 					<p>在实际项目中，最佳方案往往是在 OpenAI 和本地大语言模型之间<strong>策略性地同时使用两者</strong>。</p>
 
 					<h3>常见的混合架构</h3>
-					<div class="diagram">简单任务 → 本地大语言模型（快速、免费、私密）
-    ↓ 如果复杂
-复杂任务 → OpenAI API（强大、准确）</div>
+					<div class="diagram" data-diagram='{"width":520,"height":230,"title":"Hybrid Architecture","nodes":[{"id":"task","x":180,"y":10,"w":160,"h":44,"label":"任务类型？","style":{"stroke":"rgba(251,191,36,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"local","x":30,"y":100,"w":200,"h":80,"label":"本地大语言模型","sublabel":"快速、免费、私密","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"13","fontWeight":"600"}},{"id":"openai","x":290,"y":100,"w":200,"h":80,"label":"OpenAI API","sublabel":"强大、准确","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"13","fontWeight":"600"}}],"arrows":[{"from":"task","to":"local","direction":"down","label":"简单任务","style":{"color":"rgba(74,222,128,0.4)"}},{"from":"task","to":"openai","direction":"down","label":"复杂任务","style":{"color":"rgba(96,165,250,0.4)"}}],"labels":[{"x":260,"y":210,"text":"Strategy: route tasks by complexity","color":"#6B6B74","size":"10","anchor":"middle"}]}'></div>
 
 					<h3>成本效益分析</h3>
 					<table>

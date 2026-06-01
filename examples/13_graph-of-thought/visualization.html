@@ -4,53 +4,121 @@
 <meta charset="UTF-8" />
 <title>思维图 — 动机分析</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; }
-  header { padding: 22px 32px 14px; border-bottom: 1px solid #1e2535; }
-  header h1 { font-size: 1.25rem; color: #f8fafc; }
-  header p { margin-top: 4px; font-size: .84rem; color: #94a3b8; }
+  body {
+    font-family: 'Inter', 'Space Grotesk', system-ui, sans-serif;
+    background: #0A0A0C;
+    color: #F0F0F2;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  header h1 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #F0F0F2;
+    letter-spacing: -0.015em;
+  }
+  header p { margin-top: 4px; font-size: 0.82rem; color: #A0A0A8; }
 
   .topbar {
     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
-    padding: 10px 32px; background: #141820; border-bottom: 1px solid #1e2535;
+    padding: 10px 32px;
+    background: #111114;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
-  .legend { display: flex; gap: 14px; font-size: .75rem; color: #94a3b8; flex-wrap: wrap; }
+  .legend { display: flex; gap: 14px; font-size: 0.72rem; color: #6B6B74; flex-wrap: wrap; }
   .leg-item { display: flex; align-items: center; gap: 6px; }
   .leg-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid; }
 
   #canvas-wrap { padding: 24px 32px 18px; overflow: auto; }
   #canvas { position: relative; min-height: 980px; min-width: 1620px; }
-  #links { position: absolute; inset: 0; pointer-events: none; }
-  .edge { transition: stroke .12s, stroke-width .12s, opacity .12s; }
-  .edge.dim { opacity: 0.12; }
+  #links { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .edge { transition: stroke 200ms, stroke-width 200ms, opacity 200ms; }
+  .edge.dim { opacity: 0.1; }
   .edge.active {
-    stroke: #f6e05e;
-    stroke-width: 2.6;
+    stroke: rgba(184,196,208,0.5);
+    stroke-width: 2.2;
     opacity: 1;
   }
-  .stage { position: absolute; top: 0; font-size: .68rem; color: #64748b; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .stage {
+    position: absolute; top: 0; font-size: 0.66rem; color: #6B6B74;
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+  }
 
   .node {
-    position: absolute; width: 240px; border-radius: 10px; border: 1.5px solid #2d3748;
-    background: #161c27; padding: 10px 11px; transition: transform .12s;
+    position: absolute; width: 240px;
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);
+    background: #111114; padding: 10px 11px;
+    transition: all 200ms cubic-bezier(0.25,0.1,0.25,1);
+    overflow: hidden;
   }
-  .node:hover { transform: translateY(-1px); }
-  .node.root { background: #172033; border-color: #3b82f6; }
-  .node.hypothesis { background: #1a202c; border-color: #475569; }
-  .node.contrast { background: #1f170a; border-color: #b7791f; }
-  .node.refined { background: #132025; border-color: #0ea5a6; }
-  .node.synthesis { background: #15231a; border-color: #2f7a50; }
-  .node.conclusion { background: #1e1600; border-color: #d4a017; border-width: 2px; }
-  .meta { font-size: .66rem; color: #93a0b3; margin-bottom: 6px; }
-  .text { font-size: .77rem; line-height: 1.45; color: #e2e8f0; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
-  .score { display: inline-block; margin-top: 7px; font-size: .65rem; color: #a0aec0; border: 1px solid #334155; border-radius: 999px; padding: 2px 7px; }
+  .node::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 80% 50% at 50% 120%, rgba(255,255,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .node:hover { background: #18181C; }
+  .node.root { background: #18181C; border-color: rgba(96,165,250,0.3); }
+  .node.hypothesis { background: #131316; border-color: rgba(255,255,255,0.08); }
+  .node.contrast { background: #181610; border-color: rgba(251,191,36,0.2); }
+  .node.refined { background: #101818; border-color: rgba(184,196,208,0.15); }
+  .node.synthesis { background: #121812; border-color: rgba(74,222,128,0.15); }
+  .node.conclusion { background: #1a1810; border-color: rgba(251,191,36,0.35); border-width: 1.5px; }
+  .meta {
+    font-size: 0.64rem; color: #6B6B74; margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    position: relative; z-index: 1;
+  }
+  .text {
+    font-size: 0.76rem; line-height: 1.48; color: #F0F0F2;
+    display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    position: relative; z-index: 1;
+  }
+  .score {
+    display: inline-block; margin-top: 7px; font-size: 0.64rem; color: #A0A0A8;
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 2px 7px;
+    font-family: 'JetBrains Mono', monospace;
+    position: relative; z-index: 1;
+  }
 
   #result {
-    margin: 0 32px 28px; border: 1px solid #1e2535; border-radius: 10px; background: #141820; padding: 16px 18px;
+    margin: 0 32px 28px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    background: #111114;
+    padding: 16px 18px;
+    overflow: hidden;
+    position: relative;
   }
-  #result h2 { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
-  .label { margin-top: 9px; margin-bottom: 4px; color: #8aa0bb; font-size: .74rem; }
-  .body { font-size: .84rem; line-height: 1.62; color: #dbe7f5; }
+  #result::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 80% 50% at 50% 120%, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  #result h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #6B6B74; margin-bottom: 10px; font-weight: 500;
+  }
+  .label {
+    margin-top: 9px; margin-bottom: 4px; color: #A0A0A8; font-size: 0.72rem;
+    font-weight: 500; position: relative; z-index: 1;
+  }
+  .body {
+    font-size: 0.84rem; line-height: 1.65; color: #A0A0A8;
+    position: relative; z-index: 1;
+  }
   ul { margin-left: 18px; }
 </style>
 </head>
@@ -62,18 +130,18 @@
 
 <div class="topbar">
   <div class="legend">
-    <span class="leg-item"><span class="leg-dot" style="background:#172033;border-color:#3b82f6"></span>根节点</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#1a202c;border-color:#475569"></span>假设</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#1f170a;border-color:#b7791f"></span>对比</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#132025;border-color:#0ea5a6"></span>精炼</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#15231a;border-color:#2f7a50"></span>综合</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#1e1600;border-color:#d4a017"></span>结论</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#18181C;border-color:rgba(96,165,250,0.3)"></span>根节点</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#131316;border-color:rgba(255,255,255,0.08)"></span>假设</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#181610;border-color:rgba(251,191,36,0.2)"></span>对比</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#101818;border-color:rgba(184,196,208,0.15)"></span>精炼</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#121812;border-color:rgba(74,222,128,0.15)"></span>综合</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1a1810;border-color:rgba(251,191,36,0.35)"></span>结论</span>
   </div>
 </div>
 
 <div id="canvas-wrap">
   <div id="canvas">
-    <svg id="links"></svg>
+    <svg id="links" role="img" aria-label="思维图连线"><title>思维图连线</title></svg>
   </div>
 </div>
 
@@ -134,8 +202,6 @@ for (const [col, arr] of Object.entries(cols)) {
 
 const maxY = Math.max(...Object.values(pos).map(p => p.y));
 canvas.style.height = `${maxY + NODE_H + 34}px`;
-svg.setAttribute("width", canvas.clientWidth);
-svg.setAttribute("height", canvas.clientHeight);
 
 for (const [col, title] of Object.entries(colTitle)) {
   const t = document.createElement("div");
@@ -159,6 +225,13 @@ for (const n of D.nodes) {
   canvas.appendChild(card);
 }
 
+function sizeSvg() {
+  svg.setAttribute("width", canvas.scrollWidth);
+  svg.setAttribute("height", canvas.scrollHeight);
+}
+sizeSvg();
+requestAnimationFrame(sizeSvg);
+
 function draw(parentId, childId) {
   const p = pos[parentId];
   const c = pos[childId];
@@ -172,9 +245,9 @@ function draw(parentId, childId) {
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   path.setAttribute("d", `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`);
   path.setAttribute("fill", "none");
-  path.setAttribute("stroke", "#334155");
-  path.setAttribute("stroke-width", "1.4");
-  path.setAttribute("opacity", "0.75");
+  path.setAttribute("stroke", "rgba(255,255,255,0.06)");
+  path.setAttribute("stroke-width", "1.2");
+  path.setAttribute("opacity", "0.7");
   path.setAttribute("class", "edge");
   path.dataset.parentId = parentId;
   path.dataset.childId = childId;

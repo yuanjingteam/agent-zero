@@ -4,50 +4,107 @@
 <meta charset="UTF-8" />
 <title>思维树 — 动机分析</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: #0f1117; color: #e2e8f0; }
-  header { padding: 22px 32px 14px; border-bottom: 1px solid #1e2535; }
-  header h1 { font-size: 1.28rem; font-weight: 700; color: #f7fafc; }
-  header p { margin-top: 4px; font-size: .84rem; color: #a0aec0; }
+  body {
+    font-family: 'Inter', 'Space Grotesk', system-ui, sans-serif;
+    background: #0A0A0C;
+    color: #F0F0F2;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    padding: 24px 32px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  header h1 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #F0F0F2;
+    letter-spacing: -0.015em;
+  }
+  header p {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    color: #A0A0A8;
+  }
 
   .topbar {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 32px; background: #141820; border-bottom: 1px solid #1e2535;
+    padding: 10px 32px;
+    background: #111114;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     flex-wrap: wrap; gap: 12px;
   }
-  .legend { display: flex; gap: 14px; font-size: .75rem; color: #94a3b8; }
+  .legend { display: flex; gap: 14px; font-size: 0.72rem; color: #6B6B74; }
   .leg-item { display: flex; align-items: center; gap: 6px; }
   .leg-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid; }
 
   #canvas-wrap { position: relative; overflow-x: auto; padding: 26px 32px 18px; }
   #canvas { position: relative; min-height: 350px; min-width: 920px; }
-  #lines { position: absolute; inset: 0; pointer-events: none; }
+  #lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 
   .stage {
-    position: absolute; top: 0; font-size: .69rem; letter-spacing: .08em;
-    text-transform: uppercase; color: #64748b; font-weight: 700;
+    position: absolute; top: 0; font-size: 0.66rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #6B6B74; font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
   }
 
   .node {
-    position: absolute; width: 220px; border-radius: 10px; padding: 11px 12px 10px;
-    border: 1.5px solid #2d3748; background: #161c27;
+    position: absolute; width: 220px;
+    border-radius: 10px; padding: 11px 12px 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: #111114;
+    transition: all 200ms cubic-bezier(0.25,0.1,0.25,1);
+    overflow: hidden;
   }
-  .node.root { background: #172033; border-color: #3b82f6; }
-  .node.kept { background: #0f1e14; border-color: #2f7a50; }
-  .node.win { background: #1e1600; border-color: #d4a017; border-width: 2px; }
-  .node.pruned { opacity: .48; }
-  .title { font-size: .79rem; line-height: 1.42; color: #e2e8f0; }
+  .node::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 80% 50% at 50% 120%, rgba(255,255,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .node.root { background: #18181C; border-color: rgba(96,165,250,0.3); }
+  .node.kept { background: #141a16; border-color: rgba(74,222,128,0.2); }
+  .node.win { background: #1a1810; border-color: rgba(251,191,36,0.35); border-width: 1.5px; }
+  .node.pruned { opacity: 0.4; }
+  .title {
+    font-size: 0.78rem; line-height: 1.45; color: #F0F0F2;
+    position: relative; z-index: 1;
+  }
   .score {
-    margin-top: 8px; display: inline-block; font-size: .66rem; color: #94a3b8;
-    border: 1px solid #334155; border-radius: 999px; padding: 2px 7px;
+    margin-top: 8px; display: inline-block; font-size: 0.64rem; color: #A0A0A8;
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; padding: 2px 7px;
+    font-family: 'JetBrains Mono', monospace;
+    position: relative; z-index: 1;
   }
 
   #analysis {
-    margin: 0 32px 28px; padding: 18px 22px; border-radius: 10px;
-    border: 1px solid #1e2535; background: #141820;
+    margin: 0 32px 28px; padding: 18px 22px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: #111114;
+    overflow: hidden;
+    position: relative;
   }
-  #analysis h2 { font-size: .73rem; letter-spacing: .08em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
-  #summary { color: #cbd5e1; font-size: .9rem; line-height: 1.65; }
+  #analysis::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 80% 50% at 50% 120%, rgba(255,255,255,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  #analysis h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #6B6B74; margin-bottom: 10px; font-weight: 500;
+  }
+  #summary {
+    color: #A0A0A8; font-size: 0.88rem; line-height: 1.65;
+    position: relative; z-index: 1;
+  }
 </style>
 </head>
 <body>
@@ -58,16 +115,16 @@
 
 <div class="topbar">
   <div class="legend">
-    <span class="leg-item"><span class="leg-dot" style="background:#172033;border-color:#3b82f6"></span>行为输入</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#0f1e14;border-color:#2f7a50"></span>保留分支</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#1e1600;border-color:#d4a017"></span>获胜分支</span>
-    <span class="leg-item"><span class="leg-dot" style="background:#161c27;border-color:#2d3748"></span>修剪分支</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#18181C;border-color:rgba(96,165,250,0.3)"></span>行为输入</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#141a16;border-color:rgba(74,222,128,0.2)"></span>保留分支</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1a1810;border-color:rgba(251,191,36,0.35)"></span>获胜分支</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#111114;border-color:rgba(255,255,255,0.06)"></span>修剪分支</span>
   </div>
 </div>
 
 <div id="canvas-wrap">
   <div id="canvas">
-    <svg id="lines"></svg>
+    <svg id="lines" role="img" aria-label="思维树连线"><title>思维树连线</title></svg>
   </div>
 </div>
 
@@ -121,8 +178,6 @@ for (const depthKey of Object.keys(byDepth)) {
 
 const maxY = Math.max(...Object.values(pos).map(p => p.y));
 canvas.style.height = `${maxY + NODE_H + 40}px`;
-svg.setAttribute("width", canvas.clientWidth);
-svg.setAttribute("height", canvas.clientHeight);
 
 for (const n of nodes) {
   const card = document.createElement("div");
@@ -149,6 +204,13 @@ for (const n of nodes) {
   canvas.appendChild(card);
 }
 
+function sizeSvg() {
+  svg.setAttribute("width", canvas.scrollWidth);
+  svg.setAttribute("height", canvas.scrollHeight);
+}
+sizeSvg();
+requestAnimationFrame(sizeSvg);
+
 function drawLine(parent, child, color, width, dashed = false, opacity = 1) {
   const x1 = pos[parent.id].x + NODE_W;
   const y1 = pos[parent.id].y + NODE_H / 2;
@@ -172,10 +234,10 @@ for (const n of nodes) {
   drawLine(
     p,
     n,
-    winningEdge ? "#d4a017" : (n.kept ? "#2f7a50" : "#334155"),
-    winningEdge ? 2.4 : 1.4,
+    winningEdge ? "rgba(251,191,36,0.6)" : (n.kept ? "rgba(74,222,128,0.3)" : "rgba(255,255,255,0.06)"),
+    winningEdge ? 2 : 1.2,
     !n.kept,
-    n.kept ? 1 : 0.35
+    n.kept ? 0.8 : 0.3
   );
 }
 

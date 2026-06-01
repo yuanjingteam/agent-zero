@@ -6,6 +6,7 @@
 	<title>03 - 翻译：系统提示与智能体专业化 | 从零开始构建 AI 智能体</title>
 	<meta name="description" content="使用系统提示专业化智能体，控制输出格式，实现基于角色的行为。">
 	<link rel="stylesheet" href="../styles.css">
+	<script src="../diagram.js" defer></script>
 </head>
 <body>
 	<nav class="nav">
@@ -48,49 +49,20 @@
 					<p><strong>系统提示词</strong>是一条持久性指令，用于在整个对话会话中塑造 AI 的行为。</p>
 
 					<h3>类比</h3>
-					<div class="diagram">没有系统提示词                    有系统提示词
-─────────────────────         ──────────────────────
-"嗨，我是 AI。"                "我是一名专业翻译，
-                              精通科学德语。
-"我能为你做什么？"             我遵循严格的质量准则
-                              和输出格式。"</div>
+					<div class="diagram" data-diagram='{"width":680,"height":220,"title":"System Prompt Analogy","nodes":[{"id":"left","x":20,"y":30,"w":300,"h":170,"label":"没有系统提示词","sublabel":"Generic AI","style":{"stroke":"rgba(248,113,113,0.2)","fontSize":"13","fontWeight":"600"}},{"id":"right","x":360,"y":30,"w":300,"h":170,"label":"有系统提示词","sublabel":"Specialized Agent","style":{"stroke":"rgba(74,222,128,0.3)","fontSize":"13","fontWeight":"600"}}],"labels":[{"x":170,"y":95,"text":"\"嗨，我是 AI。\"","color":"#A0A0A8","size":"12","anchor":"middle"},{"x":170,"y":130,"text":"\"我能为你做什么？\"","color":"#A0A0A8","size":"12","anchor":"middle"},{"x":510,"y":80,"text":"\"我是一名专业翻译，","color":"#F0F0F2","size":"12","anchor":"middle"},{"x":510,"y":100,"text":"精通科学德语。\"","color":"#F0F0F2","size":"12","anchor":"middle"},{"x":510,"y":130,"text":"\"我遵循严格的质量准则","color":"#F0F0F2","size":"12","anchor":"middle"},{"x":510,"y":150,"text":"和输出格式。\"","color":"#F0F0F2","size":"12","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="how-it-works">
 					<h2>系统提示词的工作原理</h2>
 					<h3>上下文结构</h3>
-					<div class="diagram">┌─────────────────────────────────────────────┐
-│           上下文窗口（Context Window）        │
-│                                             │
-│  ┌───────────────────────────────────────┐ │
-│  │  系统提示词（始终存在）                 │ │
-│  │  "你是一名专业翻译……"                  │ │
-│  │  "遵循以下规则……"                     │ │
-│  └───────────────────────────────────────┘ │
-│                    ↓                        │
-│  ┌───────────────────────────────────────┐ │
-│  │  用户消息                             │ │
-│  │  "翻译这段文本……"                     │ │
-│  └───────────────────────────────────────┘ │
-│                    ↓                        │
-│  ┌───────────────────────────────────────┐ │
-│  │  AI 回复                              │ │
-│  │  （受系统提示词塑造）                   │ │
-│  └───────────────────────────────────────┘ │
-└─────────────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":520,"height":380,"title":"Context Window Structure","nodes":[{"id":"outer","x":20,"y":10,"w":480,"h":360,"label":"上下文窗口（Context Window）","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"13","fontWeight":"600"}},{"id":"sys","x":50,"y":50,"w":420,"h":80,"label":"系统提示词（始终存在）","sublabel":"\"你是一名专业翻译……\"  \"遵循以下规则……\"","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"user","x":50,"y":180,"w":420,"h":60,"label":"用户消息","sublabel":"\"翻译这段文本……\"","style":{"fill":"#18181C"}},{"id":"ai","x":50,"y":290,"w":420,"h":60,"label":"AI 回复","sublabel":"（受系统提示词塑造）","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.2)"}}],"arrows":[{"from":"sys","to":"user","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"user","to":"ai","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}}]}'></div>
 					<p>系统提示词位于上下文的最顶部，影响<strong>每一次</strong>回复。</p>
 				</div>
 
 				<div class="content-section" id="specialization">
 					<h2>智能体专门化模式</h2>
 					<h3>转变流程</h3>
-					<div class="diagram">┌──────────────────┐    ┌─────────────────┐    ┌──────────────────┐
-│   通用模型       │ +  │  系统提示词     │ =  │  专门化智能体    │
-│                  │    │                 │    │                  │
-│ • 了解很多知识   │    │ • 定义角色      │    │ • 翻译智能体     │
-│ • 没有特定角色   │    │ • 设定规则      │    │ • 编码智能体     │
-│                  │    │ • 约束输出      │    │ • 分析智能体     │
-└──────────────────┘    └─────────────────┘    └──────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":700,"height":200,"title":"Agent Specialization","nodes":[{"id":"model","x":20,"y":30,"w":200,"h":140,"label":"通用模型","sublabel":"了解很多知识 · 没有特定角色","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"prompt","x":270,"y":30,"w":160,"h":140,"label":"系统提示词","sublabel":"定义角色 · 设定规则 · 约束输出","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"agent","x":480,"y":30,"w":200,"h":140,"label":"专门化智能体","sublabel":"翻译智能体 · 编码智能体 · 分析智能体","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"model","to":"prompt","direction":"right","label":"+","style":{"color":"rgba(184,196,208,0.3)"}},{"from":"prompt","to":"agent","direction":"right","label":"=","style":{"color":"rgba(74,222,128,0.4)"}}]}'></div>
 
 					<h3>专门化示例</h3>
 					<pre><code>// 翻译智能体（本示例）
@@ -110,29 +82,10 @@ Cite data sources when available."</code></pre>
 				<div class="content-section" id="anatomy">
 					<h2>有效系统提示词的解剖</h2>
 					<h3>五大组成部分</h3>
-					<div class="diagram">┌─────────────────────────────────────────┐
-│  1. 角色定义（Role Definition）          │
-│  "你是一名 [具体角色]……"                │
-├─────────────────────────────────────────┤
-│  2. 任务描述（Task Description）         │
-│  "你的目标是……"                         │
-├─────────────────────────────────────────┤
-│  3. 行为规则（Behavioral Rules）         │
-│  "始终做 X，绝不做 Y……"                 │
-├─────────────────────────────────────────┤
-│  4. 输出格式（Output Format）            │
-│  "按以下格式输出你的回复……"              │
-├─────────────────────────────────────────┤
-│  5. 约束条件（Constraints）              │
-│  "不要包含……"                           │
-└─────────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":500,"height":340,"title":"System Prompt Anatomy","nodes":[{"id":"r1","x":40,"y":10,"w":420,"h":50,"label":"1. 角色定义（Role Definition）","sublabel":"\"你是一名 [具体角色]……\"","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"r2","x":40,"y":70,"w":420,"h":50,"label":"2. 任务描述（Task Description）","sublabel":"\"你的目标是……\"","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"r3","x":40,"y":130,"w":420,"h":50,"label":"3. 行为规则（Behavioral Rules）","sublabel":"\"始终做 X，绝不做 Y……\"","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"r4","x":40,"y":190,"w":420,"h":50,"label":"4. 输出格式（Output Format）","sublabel":"\"按以下格式输出你的回复……\"","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"r5","x":40,"y":250,"w":420,"h":50,"label":"5. 约束条件（Constraints）","sublabel":"\"不要包含……\"","style":{"stroke":"rgba(248,113,113,0.3)"}}],"labels":[{"x":250,"y":325,"text":"Five key components of an effective system prompt","color":"#6B6B74","size":"10","anchor":"middle"}]}'></div>
 
 					<h3>本示例的结构</h3>
-					<div class="diagram">角色：      "专业科学翻译"
-任务：      "将英语精确翻译为德语"
-规则：      8 条具体翻译指南
-格式：      地道德语，科学风格
-约束：      "仅输出翻译文本，不加解释"</div>
+					<div class="diagram" data-diagram='{"width":460,"height":280,"title":"Example Structure","nodes":[{"id":"role","x":40,"y":15,"w":380,"h":40,"label":"角色：\"专业科学翻译\"","style":{"stroke":"rgba(96,165,250,0.3)","fontSize":"12"}},{"id":"task","x":40,"y":65,"w":380,"h":40,"label":"任务：\"将英语精确翻译为德语\"","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"12"}},{"id":"rules","x":40,"y":115,"w":380,"h":40,"label":"规则：8 条具体翻译指南","style":{"stroke":"rgba(251,191,36,0.25)","fontSize":"12"}},{"id":"format","x":40,"y":165,"w":380,"h":40,"label":"格式：地道德语，科学风格","style":{"stroke":"rgba(184,196,208,0.15)","fontSize":"12"}},{"id":"constraint","x":40,"y":215,"w":380,"h":40,"label":"约束：\"仅输出翻译文本，不加解释\"","style":{"stroke":"rgba(248,113,113,0.25)","fontSize":"12"}}],"arrows":[{"from":"role","to":"task","direction":"down","style":{"color":"rgba(184,196,208,0.15)"}},{"from":"task","to":"rules","direction":"down","style":{"color":"rgba(184,196,208,0.15)"}},{"from":"rules","to":"format","direction":"down","style":{"color":"rgba(184,196,208,0.15)"}},{"from":"format","to":"constraint","direction":"down","style":{"color":"rgba(184,196,208,0.15)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="quality">
@@ -180,21 +133,7 @@ Cite data sources when available."</code></pre>
 
 				<div class="content-section" id="agent-relation">
 					<h2>这与 AI 智能体的关系</h2>
-					<div class="diagram">┌────────────────────────────────────────────┐
-│             AI 智能体                       │
-│                                            │
-│  ┌──────────────────────────────────────┐ │
-│  │  系统提示词（智能体的"身份"）         │ │
-│  └──────────────────────────────────────┘ │
-│                  ↓                         │
-│  ┌──────────────────────────────────────┐ │
-│  │  LLM（智能体的"大脑"）               │ │
-│  └──────────────────────────────────────┘ │
-│                  ↓                         │
-│  ┌──────────────────────────────────────┐ │
-│  │  工具（智能体的"双手"）[可选]        │ │
-│  └──────────────────────────────────────┘ │
-└────────────────────────────────────────────┘</div>
+					<div class="diagram" data-diagram='{"width":480,"height":320,"title":"AI Agent Layers","nodes":[{"id":"outer","x":20,"y":10,"w":440,"h":300,"label":"AI 智能体","style":{"stroke":"rgba(184,196,208,0.12)","fontSize":"14","fontWeight":"600"}},{"id":"sys","x":55,"y":45,"w":370,"h":60,"label":"系统提示词（智能体的\"身份\"）","style":{"fill":"#18181C","stroke":"rgba(96,165,250,0.3)"}},{"id":"llm","x":55,"y":130,"w":370,"h":60,"label":"LLM（智能体的\"大脑\"）","style":{"fill":"#18181C","stroke":"rgba(184,196,208,0.2)"}},{"id":"tools","x":55,"y":215,"w":370,"h":60,"label":"工具（智能体的\"双手\"）[可选]","style":{"fill":"#18181C","stroke":"rgba(74,222,128,0.25)"}}],"arrows":[{"from":"sys","to":"llm","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"llm","to":"tools","direction":"down","style":{"color":"rgba(184,196,208,0.25)"}}]}'></div>
 				</div>
 
 				<div class="content-section" id="chat-wrappers">
@@ -210,23 +149,12 @@ Cite data sources when available."</code></pre>
 							<tr><td>Harmony 模型</td><td>Harmony 格式</td><td>HarmonyChatWrapper</td></tr>
 						</tbody>
 					</table>
-					<div class="diagram">你的消息 → [聊天包装器] → 格式化的提示词 → 模型
-                    ↓
-          添加特殊 token：
-          &lt;|system|&gt;, &lt;|user|&gt;, &lt;|assistant|&gt;</div>
+					<div class="diagram" data-diagram='{"width":700,"height":180,"title":"Chat Wrapper Flow","nodes":[{"id":"msg","x":20,"y":50,"w":130,"h":60,"label":"你的消息","style":{"stroke":"rgba(96,165,250,0.3)"}},{"id":"wrapper","x":200,"y":50,"w":150,"h":60,"label":"聊天包装器","sublabel":"添加特殊 token","style":{"stroke":"rgba(251,191,36,0.3)"}},{"id":"prompt","x":400,"y":50,"w":140,"h":60,"label":"格式化的提示词","style":{"stroke":"rgba(184,196,208,0.2)"}},{"id":"model","x":590,"y":50,"w":90,"h":60,"label":"模型","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"msg","to":"wrapper","direction":"right","style":{"color":"rgba(184,196,208,0.25)"}},{"from":"wrapper","to":"prompt","direction":"right","style":{"color":"rgba(251,191,36,0.3)"}},{"from":"prompt","to":"model","direction":"right","style":{"color":"rgba(184,196,208,0.25)"}}],"labels":[{"x":350,"y":150,"text":"<|system|>, <|user|>, <|assistant|>","color":"#6B6B74","size":"11","anchor":"middle"}]}'></div>
 				</div>
 
 				<div class="content-section" id="evolution">
 					<h2>演进路径</h2>
-					<div class="diagram">1. 基础提示           (intro.js)
-       ↓
-2. 系统提示词          (translation.js) ← 你在这里
-       ↓
-3. 系统提示词 + 工具    (simple-agent.js)
-       ↓
-4. 多轮推理            (react-agent.js)
-       ↓
-5. 完整智能体系统</div>
+					<div class="diagram" data-diagram='{"width":360,"height":380,"title":"Evolution Path","nodes":[{"id":"s1","x":60,"y":15,"w":240,"h":45,"label":"1. 基础提示","sublabel":"intro.js","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"s2","x":60,"y":90,"w":240,"h":45,"label":"2. 系统提示词","sublabel":"translation.js","style":{"stroke":"rgba(96,165,250,0.4)","strokeWidth":"2"}},{"id":"s3","x":60,"y":165,"w":240,"h":45,"label":"3. 系统提示词 + 工具","sublabel":"simple-agent.js","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"s4","x":60,"y":240,"w":240,"h":45,"label":"4. 多轮推理","sublabel":"react-agent.js","style":{"stroke":"rgba(184,196,208,0.15)"}},{"id":"s5","x":60,"y":315,"w":240,"h":45,"label":"5. 完整智能体系统","style":{"stroke":"rgba(74,222,128,0.3)"}}],"arrows":[{"from":"s1","to":"s2","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"s2","to":"s3","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"s3","to":"s4","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}},{"from":"s4","to":"s5","direction":"down","style":{"color":"rgba(184,196,208,0.2)"}}],"labels":[{"x":310,"y":112,"text":"← 你在这里","color":"rgba(96,165,250,0.8)","size":"11","anchor":"start"}]}'></div>
 					<p>本示例通过展示如何通过指令实现专门化，弥合了基础 LLM 使用与真正智能体行为之间的差距。</p>
 				</div>
 
